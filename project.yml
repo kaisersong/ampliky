@@ -1,0 +1,67 @@
+name: Ampliky
+options:
+  bundleIdPrefix: com.kaisersong
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: YES
+
+targets:
+  Ampliky:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources
+        excludes:
+          - "**/*.md"
+          - "AgentHook/CLI.swift"
+      - path: Resources
+    info:
+      path: Sources/App/Info.plist
+      properties:
+        CFBundleName: Ampliky
+        CFBundleDisplayName: Ampliky
+        CFBundleIdentifier: com.kaisersong.ampliky
+        CFBundleVersion: "20260512"
+        CFBundleShortVersionString: "0.1.0"
+        LSUIElement: true
+        LSMinimumSystemVersion: "14.0"
+        NSAppleEventsUsageDescription: Ampliky needs this permission for window management.
+        NSInputMonitoringUsageDescription: Ampliky uses global hotkeys for cursor teleport and needs input monitoring access.
+        NSPrincipalClass: NSApplication
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kaisersong.ampliky
+        PRODUCT_NAME: Ampliky
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        COMBINE_HIDPI_IMAGES: YES
+        SWIFT_STRICT_CONCURRENCY: targeted
+    entitlements:
+      path: Sources/App/Ampliky.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.cs.allow-jit: false
+        com.apple.security.cs.allow-unsigned-executable-memory: false
+
+  AmplikyTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tests/AmplikyTests
+    dependencies:
+      - target: Ampliky
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kaisersong.ampliky.tests
+        GENERATE_INFOPLIST_FILE: YES

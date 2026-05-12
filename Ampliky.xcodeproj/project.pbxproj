@@ -1,0 +1,454 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		076ECFDF8879F4BCA58928D2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F099D6097967E18E668CD58 /* AppDelegate.swift */; };
+		51FCB3B4B71122EA9D7FBE51 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */; };
+		835A3D533A307AE84D5CA7C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F4306FEC7044CED74BE38374 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EAA05D1C0C323F8E87CAB016 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EE59FD6402758B2C89326C1;
+			remoteInfo = Ampliky;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		112AA3D58729C7FA23ED8B42 /* Ampliky.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ampliky.entitlements; sourceTree = "<group>"; };
+		5F099D6097967E18E668CD58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8661523565D6134E53758B4D /* AmplikyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AmplikyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C423CC466A68EF35C1B89DB /* Ampliky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ampliky.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		BAD85EF1A3A0BF30F5610200 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		4E11416CF56771B65D245B23 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8C423CC466A68EF35C1B89DB /* Ampliky.app */,
+				8661523565D6134E53758B4D /* AmplikyTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		60E71EDDB719B9338506C6CB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		7A9F15E37A02B4F033080B7B /* AmplikyTests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = AmplikyTests;
+			sourceTree = "<group>";
+		};
+		8E0B9F17AF59EFB587E094BD /* App */ = {
+			isa = PBXGroup;
+			children = (
+				112AA3D58729C7FA23ED8B42 /* Ampliky.entitlements */,
+				5F099D6097967E18E668CD58 /* AppDelegate.swift */,
+				BAD85EF1A3A0BF30F5610200 /* Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		923B1D0BA0A0E9E10C89529C /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				8E0B9F17AF59EFB587E094BD /* App */,
+				F1B7F7CC633584B3066C91A8 /* UI */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		93C89FA312FEEDBCC6EA6E5C = {
+			isa = PBXGroup;
+			children = (
+				60E71EDDB719B9338506C6CB /* Resources */,
+				923B1D0BA0A0E9E10C89529C /* Sources */,
+				E707B024BD1ED344661977E2 /* Tests */,
+				4E11416CF56771B65D245B23 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E707B024BD1ED344661977E2 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				7A9F15E37A02B4F033080B7B /* AmplikyTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		F1B7F7CC633584B3066C91A8 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7EE59FD6402758B2C89326C1 /* Ampliky */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 584A210F5421644738A362E3 /* Build configuration list for PBXNativeTarget "Ampliky" */;
+			buildPhases = (
+				3569AAF383DF9D1899978292 /* Sources */,
+				C08379F17FA4D20D4A235F11 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Ampliky;
+			packageProductDependencies = (
+			);
+			productName = Ampliky;
+			productReference = 8C423CC466A68EF35C1B89DB /* Ampliky.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A23B1CD4B3EB1BAD91F514C5 /* AmplikyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5E2F66A8617E7512772003AE /* Build configuration list for PBXNativeTarget "AmplikyTests" */;
+			buildPhases = (
+				867BC7BE0D1C93C248879D00 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				362057337B60036CEA957D1E /* PBXTargetDependency */,
+			);
+			name = AmplikyTests;
+			packageProductDependencies = (
+			);
+			productName = AmplikyTests;
+			productReference = 8661523565D6134E53758B4D /* AmplikyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EAA05D1C0C323F8E87CAB016 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					7EE59FD6402758B2C89326C1 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					A23B1CD4B3EB1BAD91F514C5 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A5A0AFCE76B91D95B8A98B8D /* Build configuration list for PBXProject "Ampliky" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 93C89FA312FEEDBCC6EA6E5C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4E11416CF56771B65D245B23 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7EE59FD6402758B2C89326C1 /* Ampliky */,
+				A23B1CD4B3EB1BAD91F514C5 /* AmplikyTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C08379F17FA4D20D4A235F11 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				835A3D533A307AE84D5CA7C0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3569AAF383DF9D1899978292 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				076ECFDF8879F4BCA58928D2 /* AppDelegate.swift in Sources */,
+				51FCB3B4B71122EA9D7FBE51 /* MenuBarController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		867BC7BE0D1C93C248879D00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		362057337B60036CEA957D1E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EE59FD6402758B2C89326C1 /* Ampliky */;
+			targetProxy = F4306FEC7044CED74BE38374 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		076B1F4971A3B3BD6B2AA4BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/App/Ampliky.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Sources/App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaisersong.ampliky;
+				PRODUCT_NAME = Ampliky;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+			};
+			name = Debug;
+		};
+		4F298652B433826FF6A4261F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaisersong.ampliky.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ampliky.app/Contents/MacOS/Ampliky";
+			};
+			name = Release;
+		};
+		89992A9F22BE6AF6BFE6BBE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C63340085979CFCA18396337 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CDB58D1FA453F1DD39FD25EB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaisersong.ampliky.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ampliky.app/Contents/MacOS/Ampliky";
+			};
+			name = Debug;
+		};
+		F5E1B5F90863F2A73DF8FF66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/App/Ampliky.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Sources/App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaisersong.ampliky;
+				PRODUCT_NAME = Ampliky;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		584A210F5421644738A362E3 /* Build configuration list for PBXNativeTarget "Ampliky" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				076B1F4971A3B3BD6B2AA4BC /* Debug */,
+				F5E1B5F90863F2A73DF8FF66 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5E2F66A8617E7512772003AE /* Build configuration list for PBXNativeTarget "AmplikyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDB58D1FA453F1DD39FD25EB /* Debug */,
+				4F298652B433826FF6A4261F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5A0AFCE76B91D95B8A98B8D /* Build configuration list for PBXProject "Ampliky" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C63340085979CFCA18396337 /* Debug */,
+				89992A9F22BE6AF6BFE6BBE8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EAA05D1C0C323F8E87CAB016 /* Project object */;
+}
