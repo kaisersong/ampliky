@@ -19,6 +19,7 @@
 		4E8FA2D79DD711E3530D0F32 /* SelfHealer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47258409620CFB2883F57AA2 /* SelfHealer.swift */; };
 		51FCB3B4B71122EA9D7FBE51 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */; };
 		56ECA947F8BAE189817C26BE /* RuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64EAB72655994EB65EFB757 /* RuleEngineTests.swift */; };
+		71B5BB25EB38E25067E858D0 /* ComprehensiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A35F193A2B17F9E8B7A22 /* ComprehensiveTests.swift */; };
 		82B09168EBD8B593E3FAFDD9 /* JSCRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94C55CBBEE98257337FC074D /* JSCRunner.swift */; };
 		835A3D533A307AE84D5CA7C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */; };
 		8B9DC0B1D73C6835E06D757B /* SelfHealerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296D7A08B1509D83614BB92A /* SelfHealerTests.swift */; };
@@ -26,6 +27,7 @@
 		9756C1F1B3AD15F239C64522 /* CursorAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E37C2085818E7F116FE9675 /* CursorAction.swift */; };
 		A82CD09C044B7BF8FA2679E4 /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3E4C7985C03877F95D741D /* SystemPrompt.swift */; };
 		A84610B2201EE9FC59EBA0F2 /* ActionSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1ABEDA79D2F047F1E0E429B /* ActionSchemaTests.swift */; };
+		C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA3E5FF81FC344130585207 /* ScriptStore.swift */; };
 		C777810049CB03118C99CE2C /* AppAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D530725314CF2D27DAF15 /* AppAction.swift */; };
 		D78A0A3FDBCAC2F1C2AFF5CB /* ConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */; };
 		DF4C18E1D88B4DAA01E68CA9 /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D135BFFC46F2BC71F296360 /* RuleEngine.swift */; };
@@ -66,7 +68,9 @@
 		BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C1ABEDA79D2F047F1E0E429B /* ActionSchemaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSchemaTests.swift; sourceTree = "<group>"; };
 		D12FAF1AA7E3AFC43400516A /* JSCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSCRunnerTests.swift; sourceTree = "<group>"; };
+		DBA3E5FF81FC344130585207 /* ScriptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptStore.swift; sourceTree = "<group>"; };
 		E18E0BCAC8A8D07F2C306389 /* SocketProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketProtocolTests.swift; sourceTree = "<group>"; };
+		E30A35F193A2B17F9E8B7A22 /* ComprehensiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComprehensiveTests.swift; sourceTree = "<group>"; };
 		E64EAB72655994EB65EFB757 /* RuleEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngineTests.swift; sourceTree = "<group>"; };
 		E9CD8A9DEB7A6DBA447A8534 /* SystemPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPromptTests.swift; sourceTree = "<group>"; };
 		EB892209D8FB423E34360CC2 /* ActionSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSchema.swift; sourceTree = "<group>"; };
@@ -128,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				C1ABEDA79D2F047F1E0E429B /* ActionSchemaTests.swift */,
+				E30A35F193A2B17F9E8B7A22 /* ComprehensiveTests.swift */,
 				0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */,
 				60245B2B701DFB097ADB3820 /* CursorActionTests.swift */,
 				BBE1AA019ACA20E560619F82 /* HotkeyTriggerTests.swift */,
@@ -206,6 +211,7 @@
 				EB892209D8FB423E34360CC2 /* ActionSchema.swift */,
 				40CE1B5D589E31A41CBAC2AA /* ConfigStore.swift */,
 				9D135BFFC46F2BC71F296360 /* RuleEngine.swift */,
+				DBA3E5FF81FC344130585207 /* ScriptStore.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -314,6 +320,7 @@
 				82B09168EBD8B593E3FAFDD9 /* JSCRunner.swift in Sources */,
 				51FCB3B4B71122EA9D7FBE51 /* MenuBarController.swift in Sources */,
 				DF4C18E1D88B4DAA01E68CA9 /* RuleEngine.swift in Sources */,
+				C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */,
 				4E8FA2D79DD711E3530D0F32 /* SelfHealer.swift in Sources */,
 				366EF29D1379174625DE814A /* SocketServer.swift in Sources */,
 				A82CD09C044B7BF8FA2679E4 /* SystemPrompt.swift in Sources */,
@@ -325,6 +332,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A84610B2201EE9FC59EBA0F2 /* ActionSchemaTests.swift in Sources */,
+				71B5BB25EB38E25067E858D0 /* ComprehensiveTests.swift in Sources */,
 				D78A0A3FDBCAC2F1C2AFF5CB /* ConfigStoreTests.swift in Sources */,
 				27A82DF9AFA77C7FD79D9CE9 /* CursorActionTests.swift in Sources */,
 				0F0ED511E1B7417BC6F92721 /* HotkeyTriggerTests.swift in Sources */,

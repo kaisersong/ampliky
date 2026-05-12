@@ -9,6 +9,26 @@ struct ScreenInfo {
 
 enum CursorAction {
 
+    // Testable pure function: compute target screen index without NSScreen dependency
+    static func teleportResult(target: String, currentScreenCount: Int, currentIndex: Int = 0) -> Int? {
+        switch target {
+        case "next_screen":
+            guard currentScreenCount > 1 else { return nil }
+            return (currentIndex + 1) % currentScreenCount
+        case "prev_screen":
+            guard currentScreenCount > 1 else { return nil }
+            return (currentIndex - 1 + currentScreenCount) % currentScreenCount
+        case "center":
+            return nil
+        default:
+            if target.hasPrefix("screen_"), let n = Int(target.dropFirst("screen_".count)) {
+                let index = n - 1
+                return (0..<currentScreenCount).contains(index) ? index : nil
+            }
+            return nil
+        }
+    }
+
     static func resolveScreen(target: String, from currentIndex: Int, screens: [ScreenInfo]) -> Int? {
         switch target {
         case "next_screen":

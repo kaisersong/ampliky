@@ -4,6 +4,7 @@ import Carbon
 class HotkeyTrigger {
     private var eventTap: CFMachPort?
     private var hotkeyCallbacks: [String: () -> Void] = [:]
+    var autoRestartEnabled: Bool = true
 
     static func parseKeySpec(_ spec: String) -> (NSEvent.ModifierFlags, Key)? {
         let parts = spec.lowercased().split(separator: "+").map(String.init)
@@ -69,6 +70,15 @@ class HotkeyTrigger {
     }
 
     private func handleEvent(_ event: CGEvent) {
+        // Auto-restart on disabled (Hammerspoon pattern)
+        let type = event.type
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let tap = eventTap {
+                CGEvent.tapEnable(tap: tap, enable: true)
+            }
+            return
+        }
+
         let flags = event.flags
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let nsFlags = NSEvent.ModifierFlags(rawValue: UInt(flags.rawValue))

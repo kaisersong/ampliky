@@ -29,8 +29,6 @@ class JSCRunner {
         context.evaluateScript("Function = undefined;")
 
         registerAPIs()
-
-        // Don't set exceptionHandler — let exceptions surface via context.exception
     }
 
     func execute(script: String) -> ScriptResult {
@@ -41,9 +39,7 @@ class JSCRunner {
         }
 
         let start = CFAbsoluteTimeGetCurrent()
-
         let result = context.evaluateScript(script)
-
         let duration = (CFAbsoluteTimeGetCurrent() - start) * 1000
 
         if let exception = context.exception {
@@ -60,111 +56,149 @@ class JSCRunner {
     }
 
     private func registerAPIs() {
-        let api = """
+        context.evaluateScript("""
         var Ampliky = {
             screen: {
-                count: function() {
-                    return __ampliky_screen_count();
-                },
-                list: function() {
-                    return JSON.parse(__ampliky_screen_list());
-                },
-                current: function() {
-                    return JSON.parse(__ampliky_screen_current());
-                }
+                count: function() { return __ampliky_screen_count(); },
+                list: function() { return JSON.parse(__ampliky_screen_list()); },
+                current: function() { return JSON.parse(__ampliky_screen_current()); }
             },
             cursor: {
-                position: function() {
-                    return JSON.parse(__ampliky_cursor_position());
-                },
-                moveTo: function(x, y) {
-                    __ampliky_cursor_moveTo(x, y);
-                },
-                warpNext: function() {
-                    __ampliky_cursor_warpNext();
-                },
-                warpPrev: function() {
-                    __ampliky_cursor_warpPrev();
-                },
-                warpTo: function(screenIndex) {
-                    __ampliky_cursor_warpTo(screenIndex);
+                position: function() { return JSON.parse(__ampliky_cursor_position()); },
+                moveTo: function(x, y) { __ampliky_cursor_moveTo(x, y); },
+                warpNext: function() { __ampliky_cursor_warpNext(); },
+                warpPrev: function() { __ampliky_cursor_warpPrev(); },
+                warpTo: function(i) { __ampliky_cursor_warpTo(i); }
+            },
+            app: {
+                launch: function(n) { __ampliky_app_launch(n); },
+                quit: function(n) { __ampliky_app_quit(n); },
+                running: function(n) { return __ampliky_app_running(n); },
+                frontmost: function() { return __ampliky_app_frontmost(); }
+            },
+            system: {
+                clipboard: function(t) {
+                    if (t !== undefined) { __ampliky_clipboard_set(t); return t; }
+                    return __ampliky_clipboard_get();
                 }
             }
         };
-        """
-        context.evaluateScript(api)
+        """)
 
-        // Register Swift-backed functions
         registerScreenAPIs()
         registerCursorAPIs()
+        registerAppAPIs()
+        registerSystemAPIs()
     }
 
-    private func registerScreenAPIs() {
-        let ctx = context
+    // MARK: - Screen APIs
 
-        ctx.setObject(unsafeBitCast(({ () -> Int in
+    private func registerScreenAPIs() {
+        context.setObject(unsafeBitCast({ () -> Int in
             NSScreen.screens.count
-        }) as @convention(block) () -> Int, to: AnyObject.self),
+        } as @convention(block) () -> Int, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_screen_count" as NSString)
 
-        ctx.setObject(unsafeBitCast(({ () -> String in
+        context.setObject(unsafeBitCast({ () -> String in
             let screens = NSScreen.screens.enumerated().map { (i, s) -> [String: Any] in
-                return ["id": i, "x": s.frame.origin.x, "y": s.frame.origin.y,
-                        "width": s.frame.width, "height": s.frame.height,
-                        "isMain": i == 0]
+                ["id": i, "x": s.frame.origin.x, "y": s.frame.origin.y,
+                 "width": s.frame.width, "height": s.frame.height, "isMain": i == 0]
             }
             let data = try! JSONSerialization.data(withJSONObject: screens)
             return String(data: data, encoding: .utf8)!
-        }) as @convention(block) () -> String, to: AnyObject.self),
+        } as @convention(block) () -> String, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_screen_list" as NSString)
 
-        ctx.setObject(unsafeBitCast(({ () -> String in
+        context.setObject(unsafeBitCast({ () -> String in
             let screens = NSScreen.screens
             let mouseLoc = NSEvent.mouseLocation
             var current = screens.first!
             for screen in screens {
-                if screen.frame.contains(mouseLoc) {
-                    current = screen
-                    break
-                }
+                if screen.frame.contains(mouseLoc) { current = screen; break }
             }
             let obj: [String: Any] = ["x": current.frame.origin.x, "y": current.frame.origin.y,
                                       "width": current.frame.width, "height": current.frame.height]
             let data = try! JSONSerialization.data(withJSONObject: obj)
             return String(data: data, encoding: .utf8)!
-        }) as @convention(block) () -> String, to: AnyObject.self),
+        } as @convention(block) () -> String, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_screen_current" as NSString)
     }
 
-    private func registerCursorAPIs() {
-        let ctx = context
+    // MARK: - Cursor APIs
 
-        ctx.setObject(unsafeBitCast(({ () -> String in
+    private func registerCursorAPIs() {
+        context.setObject(unsafeBitCast({ () -> String in
             let loc = NSEvent.mouseLocation
-            let obj: [String: Any] = ["x": loc.x, "y": loc.y]
-            let data = try! JSONSerialization.data(withJSONObject: obj)
+            let data = try! JSONSerialization.data(withJSONObject: ["x": loc.x, "y": loc.y])
             return String(data: data, encoding: .utf8)!
-        }) as @convention(block) () -> String, to: AnyObject.self),
+        } as @convention(block) () -> String, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_cursor_position" as NSString)
 
-        ctx.setObject(unsafeBitCast(({ (_ x: Double, _ y: Double) -> Void in
+        context.setObject(unsafeBitCast({ (x: Double, y: Double) in
             CGWarpMouseCursorPosition(CGPoint(x: x, y: y))
-        }) as @convention(block) (Double, Double) -> Void, to: AnyObject.self),
+        } as @convention(block) (Double, Double) -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_cursor_moveTo" as NSString)
 
-        ctx.setObject(unsafeBitCast(({ () -> Void in
+        context.setObject(unsafeBitCast({ () in
             CursorAction.teleport(to: "next_screen")
-        }) as @convention(block) () -> Void, to: AnyObject.self),
+        } as @convention(block) () -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_cursor_warpNext" as NSString)
 
-        ctx.setObject(unsafeBitCast(({ () -> Void in
+        context.setObject(unsafeBitCast({ () in
             CursorAction.teleport(to: "prev_screen")
-        }) as @convention(block) () -> Void, to: AnyObject.self),
+        } as @convention(block) () -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_cursor_warpPrev" as NSString)
 
-        ctx.setObject(unsafeBitCast(({ (_ screenIndex: Int) -> Void in
-            CursorAction.teleport(to: "screen_\(screenIndex + 1)")
-        }) as @convention(block) (Int) -> Void, to: AnyObject.self),
+        context.setObject(unsafeBitCast({ (i: Int) in
+            CursorAction.teleport(to: "screen_\(i + 1)")
+        } as @convention(block) (Int) -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_cursor_warpTo" as NSString)
+    }
+
+    // MARK: - App APIs
+
+    private func registerAppAPIs() {
+        context.setObject(unsafeBitCast({ (name: String) in
+            let ws = NSWorkspace.shared
+            if let url = ws.urlForApplication(withBundleIdentifier: name) {
+                ws.open(url); return
+            }
+            ws.open(URL(fileURLWithPath: "/Applications/\(name).app"))
+        } as @convention(block) (String) -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_app_launch" as NSString)
+
+        context.setObject(unsafeBitCast({ (name: String) in
+            NSWorkspace.shared.runningApplications
+                .filter { $0.localizedName == name }
+                .forEach { $0.terminate() }
+        } as @convention(block) (String) -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_app_quit" as NSString)
+
+        context.setObject(unsafeBitCast({ (name: String) -> Bool in
+            NSWorkspace.shared.runningApplications.contains { $0.localizedName == name }
+        } as @convention(block) (String) -> Bool, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_app_running" as NSString)
+
+        context.setObject(unsafeBitCast({ () -> String in
+            NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
+        } as @convention(block) () -> String, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_app_frontmost" as NSString)
+    }
+
+    // MARK: - System APIs (clipboard only for MVP)
+
+    private func registerSystemAPIs() {
+        let pb = NSPasteboard.general
+
+        context.setObject(unsafeBitCast({ () -> String in
+            pb.string(forType: .string) ?? ""
+        } as @convention(block) () -> String, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_clipboard_get" as NSString)
+
+        context.setObject(unsafeBitCast({ (text: String) in
+            pb.clearContents()
+            pb.setString(text, forType: .string)
+        } as @convention(block) (String) -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_clipboard_set" as NSString)
     }
 }
