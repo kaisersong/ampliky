@@ -7,6 +7,43 @@ struct Rule: Codable, Equatable {
     let actions: [RuleAction]
     let enabled: Bool
     let source: String
+    let scriptPath: String? // v2: path to JXA script in scripts/
+
+    init(id: String, name: String, trigger: RuleTrigger,
+         actions: [RuleAction], enabled: Bool, source: String,
+         scriptPath: String? = nil) {
+        self.id = id
+        self.name = name
+        self.trigger = trigger
+        self.actions = actions
+        self.enabled = enabled
+        self.source = source
+        self.scriptPath = scriptPath
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, name, trigger, actions, enabled, source, scriptPath }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(name, forKey: .name)
+        try c.encode(trigger, forKey: .trigger)
+        try c.encode(actions, forKey: .actions)
+        try c.encode(enabled, forKey: .enabled)
+        try c.encode(source, forKey: .source)
+        if let sp = scriptPath { try c.encode(sp, forKey: .scriptPath) }
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        trigger = try c.decode(RuleTrigger.self, forKey: .trigger)
+        actions = try c.decode([RuleAction].self, forKey: .actions)
+        enabled = try c.decode(Bool.self, forKey: .enabled)
+        source = try c.decode(String.self, forKey: .source)
+        scriptPath = try c.decodeIfPresent(String.self, forKey: .scriptPath)
+    }
 }
 
 struct RuleAction: Codable, Equatable {
@@ -38,27 +75,25 @@ enum RuleTrigger: Codable, Equatable {
         var c = encoder.container(keyedBy: CodingKeys.self)
         switch self {
         case .hotkey(let key):
-            try c.encode("hotkey", forKey: .type)
-            try c.encode(key, forKey: .key)
+            try c.encode("hotkey", forKey: .type); try c.encode(key, forKey: .key)
         case .wifi(let ssid):
-            try c.encode("wifi", forKey: .type)
-            try c.encode(ssid, forKey: .ssid)
+            try c.encode("wifi", forKey: .type); try c.encode(ssid, forKey: .ssid)
         case .display(let count):
-            try c.encode("display", forKey: .type)
-            try c.encode(count, forKey: .count)
+            try c.encode("display", forKey: .type); try c.encode(count, forKey: .count)
         case .time(let from, let to):
-            try c.encode("time", forKey: .type)
-            try c.encode(from, forKey: .from)
-            try c.encode(to, forKey: .to)
+            try c.encode("time", forKey: .type); try c.encode(from, forKey: .from); try c.encode(to, forKey: .to)
         }
     }
 }
 
 class ConfigStore {
     private let rulesFile: URL
+    let scriptsDir: URL
 
     init(configDir: URL) {
         self.rulesFile = configDir.appendingPathComponent("rules.json")
+        self.scriptsDir = configDir.appendingPathComponent("scripts")
+        try? FileManager.default.createDirectory(at: scriptsDir, withIntermediateDirectories: true)
     }
 
     convenience init() {
@@ -82,6 +117,11 @@ class ConfigStore {
     func removeRule(id: String) {
         var rules = loadRules()
         rules.removeAll { $0.id == id }
+        // Also delete script file
+        let rule = (try? JSONDecoder().decode([Rule].self, from: try Data(contentsOf: rulesFile)))?.first { $0.id == id }
+        if let sp = rule?.scriptPath {
+            try? FileManager.default.removeItem(at: scriptsDir.appendingPathComponent(sp))
+        }
         saveRules(rules)
     }
 
