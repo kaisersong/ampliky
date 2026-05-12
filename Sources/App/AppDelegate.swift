@@ -1,6 +1,5 @@
 import AppKit
 
-@main
 class AppDelegate: NSObject, NSApplicationDelegate {
     let menuBar = MenuBarController()
     let configStore = ConfigStore()
@@ -108,5 +107,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         default:
             return SocketProtocol.errorResponse(id: request.id, code: -32601, message: "Method not found: \(request.method)")
         }
+    }
+}
+
+// Manual main entry point to ensure AppDelegate is connected
+private func appDelegateMain() {
+    let app = NSApplication.shared
+    let delegate = AppDelegate()
+    app.delegate = delegate
+    app.run()
+}
+
+@main
+enum AmplikyApp {
+    static func main() {
+        appDelegateMain()
     }
 }

@@ -1,5 +1,4 @@
 import Foundation
-import Network
 
 struct RPCRequest {
     let method: String
@@ -33,98 +32,84 @@ enum SocketProtocol {
 }
 
 class SocketServer {
-    private let socketPath: URL
-    private var listener: NWListener?
+    private let socketPath: String
+    private var listenSock: Int32 = -1
     private var handler: ((RPCRequest) -> Data)?
 
-    init(socketPath: URL? = nil) {
+    init(socketPath: String? = nil) {
         let home = FileManager.default.homeDirectoryForCurrentUser
-        self.socketPath = socketPath ?? home.appendingPathComponent(".ampliky/ampliky.sock")
+        self.socketPath = socketPath ?? home.appendingPathComponent(".ampliky/ampliky.sock").path
     }
 
     func setHandler(_ handler: @escaping (RPCRequest) -> Data) {
         self.handler = handler
     }
 
-    func start() throws {
-        let existing = socketPath.path
-        try? FileManager.default.removeItem(atPath: existing)
+    func start() {
+        let dir = URL(fileURLWithPath: socketPath).deletingLastPathComponent().path
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        try? FileManager.default.removeItem(atPath: socketPath)
 
-        listener = try NWListener(using: .tcp, on: NWEndpoint.Port(rawValue: 0)!)
-
-        // For Unix domain socket, use a different approach
-        // NWListener with .tcp requires a port, not a path.
-        // We'll use the classic Darwin socket approach for Unix sockets.
-        startUnixSocket(path: existing)
-    }
-
-    private func startUnixSocket(path: String) {
-        let sock = socket(AF_UNIX, SOCK_STREAM, 0)
-        guard sock >= 0 else { return }
+        listenSock = Darwin.socket(AF_UNIX, SOCK_STREAM, 0)
+        guard listenSock >= 0 else {
+            print("[Ampliky] socket() failed: \(errno)")
+            return
+        }
 
         var addr = sockaddr_un()
         addr.sun_family = sa_family_t(AF_UNIX)
-        path.withCString { pathPtr in
-            _ = withUnsafeMutablePointer(to: &addr.sun_path.0) { dest in
-                strcpy(dest, pathPtr)
-            }
-        }
+        socketPath.withCString { strcpy(&addr.sun_path.0, $0) }
         addr.sun_len = UInt8(MemoryLayout<sockaddr_un>.size)
 
-        guard withUnsafePointer(to: &addr) { ptr in
-            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { rebound in
-                bind(sock, rebound, socklen_t(MemoryLayout<sockaddr_un>.size))
-            }
-        } == 0 else {
-            close(sock)
+        let bindResult = withUnsafePointer(to: &addr) { ptr in
+            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { Darwin.bind(listenSock, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
+        }
+        guard bindResult == 0 else {
+            print("[Ampliky] bind() failed: \(errno) — path: \(socketPath)")
+            Darwin.close(listenSock)
             return
         }
-        chmod(path, 0o600)
-        listen(sock, 5)
 
-        // Accept connections on a background thread
+        let chmodResult = Darwin.chmod(socketPath, 0o600)
+        let listenResult = Darwin.listen(listenSock, 5)
+        print("[Ampliky] socket created at \(socketPath), chmod=\(chmodResult), listen=\(listenResult)")
+
         DispatchQueue.global(qos: .utility).async { [weak self] in
-            while let s = self {
-                let clientSock = accept(sock, nil, nil)
-                guard clientSock >= 0 else { break }
-                s.handleClientSocket(clientSock)
-            }
+            self?.acceptLoop()
         }
-        listener = nil // not using NWListener
     }
 
-    private func handleClientSocket(_ clientSock: Int32) {
+    func stop() {
+        if listenSock >= 0 {
+            Darwin.close(listenSock)
+            listenSock = -1
+        }
+        try? FileManager.default.removeItem(atPath: socketPath)
+    }
+
+    private func acceptLoop() {
+        while listenSock >= 0 {
+            let clientSock = Darwin.accept(listenSock, nil, nil)
+            guard clientSock >= 0 else { break }
+            handleClient(clientSock)
+        }
+    }
+
+    private func handleClient(_ clientSock: Int32) {
         var buffer = [UInt8](repeating: 0, count: 65536)
-        let bytesRead = recv(clientSock, &buffer, 65535, 0)
+        let bytesRead = Darwin.recv(clientSock, &buffer, 65535, 0)
         guard bytesRead > 0 else {
-            close(clientSock)
+            Darwin.close(clientSock)
             return
         }
 
         let data = Data(buffer[..<bytesRead])
         if let request = SocketProtocol.parseRequest(data), let handler = handler {
             let response = handler(request)
-            _ = response.withUnsafeBytes { ptr in
-                send(clientSock, ptr.baseAddress, response.count, 0)
+            response.withUnsafeBytes { ptr in
+                _ = Darwin.send(clientSock, ptr.baseAddress, response.count, 0)
             }
         }
-        close(clientSock)
-    }
-
-    func stop() {
-        listener?.cancel()
-        listener = nil
-        try? FileManager.default.removeItem(at: socketPath)
-    }
-
-    private func handleConnection(_ conn: NWConnection) {
-        conn.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, _, error in
-            guard let data = data, error == nil else { return }
-            if let request = SocketProtocol.parseRequest(data), let handler = self?.handler {
-                let response = handler(request)
-                conn.send(content: response, completion: .contentProcessed { _ in })
-            }
-            self?.handleConnection(conn)
-        }
+        Darwin.close(clientSock)
     }
 }
