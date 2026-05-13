@@ -46,15 +46,6 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         COMBINE_HIDPI_IMAGES: YES
         SWIFT_STRICT_CONCURRENCY: targeted
-    postCompileScripts:
-      - name: Reset permissions (Debug only)
-        script: |
-          if [ "$CONFIGURATION" = "Debug" ]; then
-            echo "[Ampliky] Debug build: resetting permissions"
-            tccutil reset All com.kaisersong.ampliky 2>/dev/null || true
-          fi
-        basedOnDependencyAnalysis: false
-        runOnlyWhenInstalling: false
     entitlements:
       path: Sources/App/Ampliky.entitlements
       properties:
