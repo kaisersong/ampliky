@@ -136,7 +136,15 @@ class JSCRunner {
                 clipboard: function(t) {
                     if (t !== undefined) { __ampliky_clipboard_set(t); return t; }
                     return __ampliky_clipboard_get();
-                }
+                },
+                toggleMute: function() { __ampliky_system_toggleMute(); },
+                lockScreen: function() { __ampliky_system_lockScreen(); }
+            },
+            window: {
+                leftHalf: function() { __ampliky_window_leftHalf(); },
+                rightHalf: function() { __ampliky_window_rightHalf(); },
+                maximize: function() { __ampliky_window_maximize(); },
+                center: function() { __ampliky_window_center(); }
             }
         };
         """)
@@ -145,6 +153,7 @@ class JSCRunner {
         registerCursorAPIs()
         registerAppAPIs()
         registerSystemAPIs()
+        registerWindowAPIs()
     }
 
     // MARK: - Screen APIs
@@ -241,7 +250,7 @@ class JSCRunner {
         forKeyedSubscript: "__ampliky_app_frontmost" as NSString)
     }
 
-    // MARK: - System APIs (clipboard only for MVP)
+    // MARK: - System APIs
 
     private func registerSystemAPIs() {
         let pb = NSPasteboard.general
@@ -256,5 +265,76 @@ class JSCRunner {
             pb.setString(text, forType: .string)
         } as @convention(block) (String) -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_clipboard_set" as NSString)
+
+        // Toggle mute using AppleScript
+        context.setObject(unsafeBitCast({ () in
+            if let scriptObject = NSAppleScript(source: "set volume output muted not (output muted of (get volume settings))") {
+                var error: NSDictionary?
+                scriptObject.executeAndReturnError(&error)
+            }
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_system_toggleMute" as NSString)
+
+        // Lock screen
+        context.setObject(unsafeBitCast({ () in
+            if let scriptObject = NSAppleScript(source: """
+                tell application "System Events"
+                    keystroke "q" using {command down, control down}
+                end tell
+                """) {
+                var error: NSDictionary?
+                scriptObject.executeAndReturnError(&error)
+            }
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_system_lockScreen" as NSString)
+    }
+
+    // MARK: - Window APIs
+
+    private func registerWindowAPIs() {
+        context.setObject(unsafeBitCast({ () in
+            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
+                if let screen = win.screen {
+                    var frame = screen.frame
+                    frame.size.width /= 2
+                    win.setFrame(frame, display: true, animate: true)
+                }
+            }
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_leftHalf" as NSString)
+
+        context.setObject(unsafeBitCast({ () in
+            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
+                if let screen = win.screen {
+                    var frame = screen.frame
+                    frame.origin.x += frame.width / 2
+                    frame.size.width /= 2
+                    win.setFrame(frame, display: true, animate: true)
+                }
+            }
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_rightHalf" as NSString)
+
+        context.setObject(unsafeBitCast({ () in
+            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
+                if let screen = win.screen {
+                    win.setFrame(screen.frame, display: true, animate: true)
+                }
+            }
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_maximize" as NSString)
+
+        context.setObject(unsafeBitCast({ () in
+            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
+                if let screen = win.screen {
+                    let size = win.frame.size
+                    var frame = screen.frame
+                    frame.origin.x = (frame.width - size.width) / 2 + frame.origin.x
+                    frame.origin.y = (frame.height - size.height) / 2 + frame.origin.y
+                    win.setFrame(frame, display: true, animate: true)
+                }
+            }
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_center" as NSString)
     }
 }
