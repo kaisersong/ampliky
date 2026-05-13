@@ -28,12 +28,10 @@ enum SystemPrompt {
     - 脚本不超过 100 行
     - 必须是同步代码
 
-    输出 JSON 格式：
-    {
-      "trigger": {"type": "hotkey|gesture|wifi|display|time", ...},
-      "script": "JavaScript 代码",
-      "description": "一句话描述"
-    }
+    输出要求：
+    只输出纯 JSON，不要任何解释、markdown 代码块或其他文字。
+    必须且只能输出以下格式的 JSON 对象：
+    {"trigger":{"type":"hotkey","key":"cmd+opt+right"},"script":"Ampliky.cursor.warpNext()","description":"跳到下一个屏幕"}
 
     如果用户没有指定触发方式，默认用 hotkey，选一个合理的快捷键组合。
     """
@@ -46,9 +44,6 @@ enum SystemPrompt {
 
             用户说"跳到右边屏幕"：
             {"trigger":{"type":"hotkey","key":"cmd+opt+right"},"script":"Ampliky.cursor.warpNext()","description":"光标跳到下一个屏幕"}
-
-            用户说"三指点击跳到副屏"：
-            {"trigger":{"type":"gesture","fingers":3,"action":"tap"},"script":"var s = Ampliky.screen.list(); if (s.length > 1) { Ampliky.cursor.warpTo(1); }","description":"三指点击跳到第二个屏幕"}
             """
         ),
         SceneTemplate(

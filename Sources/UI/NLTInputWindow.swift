@@ -1,26 +1,24 @@
 import AppKit
 
-// MARK: - NLT (Natural Language Trigger) Input Window
-
 class NLTInputWindow: NSWindow {
     private var inputView: NSTextView!
     private var generateBtn: NSButton!
-    private var previewArea: NSTextView!
     private var triggerLabel: NSTextField!
     private var scriptView: NSTextView!
     private var statusLabel: NSTextField!
     private var saveBtn: NSButton!
     private var cancelBtn: NSButton!
 
+    private var lastParsedResult: (trigger: RuleTrigger, script: String)?
+
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 500, height: 450),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 500, height: 420),
                    styleMask: [.titled, .closable, .resizable],
                    backing: .buffered, defer: false)
         title = "新建快捷指令"
         isReleasedWhenClosed = false
         minSize = NSSize(width: 400, height: 350)
         center()
-
         buildUI()
     }
 
@@ -28,13 +26,11 @@ class NLTInputWindow: NSWindow {
         let w = contentView!.frame.width
         var currentY: CGFloat = contentView!.frame.height - 30
 
-        // Input label
         let descLabel = NSTextField(labelWithString: "描述你的需求：")
         descLabel.frame = NSRect(x: 15, y: currentY - 20, width: 200, height: 20)
         contentView?.addSubview(descLabel)
         currentY -= 40
 
-        // Text input
         let scroll = NSScrollView(frame: NSRect(x: 15, y: currentY - 60, width: w - 30, height: 60))
         scroll.hasVerticalScroller = true
         inputView = NSTextView(frame: scroll.bounds)
@@ -46,7 +42,6 @@ class NLTInputWindow: NSWindow {
         contentView?.addSubview(scroll)
         currentY -= 75
 
-        // Generate button
         generateBtn = NSButton(title: "生成快捷指令", target: self, action: #selector(generate))
         generateBtn.frame = NSRect(x: 15, y: currentY - 30, width: 120, height: 30)
         generateBtn.bezelStyle = .rounded
@@ -54,20 +49,17 @@ class NLTInputWindow: NSWindow {
         contentView?.addSubview(generateBtn)
         currentY -= 40
 
-        // Preview area
         let previewLabel = NSTextField(labelWithString: "── 预览 ──")
         previewLabel.frame = NSRect(x: 15, y: currentY - 15, width: 200, height: 20)
         contentView?.addSubview(previewLabel)
         currentY -= 30
 
-        // Trigger info
         triggerLabel = NSTextField(labelWithString: "触发器: 等待生成...")
         triggerLabel.frame = NSRect(x: 15, y: currentY - 15, width: w - 30, height: 20)
         triggerLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         contentView?.addSubview(triggerLabel)
         currentY -= 25
 
-        // Script view
         let scriptScroll = NSScrollView(frame: NSRect(x: 15, y: currentY - 80, width: w - 30, height: 80))
         scriptScroll.hasVerticalScroller = true
         scriptView = NSTextView(frame: scriptScroll.bounds)
@@ -80,14 +72,12 @@ class NLTInputWindow: NSWindow {
         contentView?.addSubview(scriptScroll)
         currentY -= 95
 
-        // Status
         statusLabel = NSTextField(labelWithString: "")
         statusLabel.frame = NSRect(x: 15, y: currentY - 15, width: w - 30, height: 20)
         statusLabel.textColor = .systemBlue
         contentView?.addSubview(statusLabel)
         currentY -= 30
 
-        // Buttons
         saveBtn = NSButton(title: "保存", target: self, action: #selector(save))
         saveBtn.frame = NSRect(x: 15, y: currentY - 30, width: 60, height: 30)
         saveBtn.bezelStyle = .rounded
@@ -107,9 +97,8 @@ class NLTInputWindow: NSWindow {
         let prefs = ConfigStore()
         let llmConfig = prefs.loadLLMConfig()
 
-        // Check if API key is configured
         guard !llmConfig.apiKey.isEmpty else {
-            statusLabel.stringValue = "请先配置 LLM（点击 LLM 配置）"
+            statusLabel.stringValue = "请先配置 LLM（点击设置）"
             statusLabel.textColor = .systemRed
             return
         }
@@ -118,15 +107,16 @@ class NLTInputWindow: NSWindow {
         statusLabel.textColor = .systemBlue
         generateBtn.isEnabled = false
 
-        // Build system prompt
         let systemPrompt = SystemPrompt.build(intent: intent, context: "screens: \(NSScreen.screens.count)")
 
         Task { @MainActor in
             let client = LLMClient(config: llmConfig)
             do {
                 let response = try await client.chat(system: systemPrompt, user: intent)
-                // Parse JSON from response
+                print("[Ampliky] LLM response:\n\(response)")
+
                 if let result = parseLLMResponse(response) {
+                    lastParsedResult = result
                     triggerLabel.stringValue = "触发器: \(triggerDescription(result.trigger))"
                     scriptView.string = result.script
                     saveBtn.isEnabled = true
@@ -134,6 +124,8 @@ class NLTInputWindow: NSWindow {
                     statusLabel.textColor = .systemGreen
                     Logger.shared.log(level: .info, message: "生成快捷指令: \(intent)")
                 } else {
+                    // Show raw response for debugging
+                    scriptView.string = response
                     statusLabel.stringValue = "❌ LLM 返回格式不正确"
                     statusLabel.textColor = .systemRed
                 }
@@ -147,13 +139,11 @@ class NLTInputWindow: NSWindow {
 
     @objc private func save() {
         let intent = inputView.string.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let result = parseLLMResponse(scriptView.string) else { return }
+        guard let result = lastParsedResult else { return }
 
-        // Save the script file
         let scriptStore = ScriptStore()
         let filename = scriptStore.saveScript(content: result.script, name: intent)
 
-        // Create and save the shortcut
         let store = ConfigStore()
         let shortcut = Rule(
             id: UUID().uuidString,
@@ -170,7 +160,6 @@ class NLTInputWindow: NSWindow {
         statusLabel.stringValue = "✅ 已保存"
         statusLabel.textColor = .systemGreen
 
-        // Close after short delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.close()
         }
@@ -181,20 +170,39 @@ class NLTInputWindow: NSWindow {
     }
 
     private func parseLLMResponse(_ response: String) -> (trigger: RuleTrigger, script: String)? {
-        // Try to find JSON in the response
+        // Step 1: Extract JSON from markdown code blocks or raw text
         var jsonStr = response
-        if let start = response.range(of: "{"), let end = response.range(of: "}", options: .backwards) {
-            jsonStr = String(response[start.lowerBound..<end.upperBound])
+
+        // Try markdown code block first
+        if let start = response.range(of: "```json"),
+           let afterStart = response.index(start.upperBound, offsetBy: 1, limitedBy: response.endIndex),
+           let end = response.range(of: "```", range: afterStart..<response.endIndex) {
+            jsonStr = String(response[afterStart..<end.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        } else if let start = response.range(of: "```"),
+                  let afterStart = response.index(start.upperBound, offsetBy: 1, limitedBy: response.endIndex),
+                  let end = response.range(of: "```", range: afterStart..<response.endIndex) {
+            jsonStr = String(response[afterStart..<end.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            // Fallback: find outermost {...}
+            if let start = response.range(of: "{"),
+               let end = response.range(of: "}", options: .backwards) {
+                jsonStr = String(response[start.lowerBound..<end.upperBound])
+            }
         }
 
+        print("[Ampliky] Extracted JSON: \(jsonStr)")
+
+        // Step 2: Parse JSON
         guard let data = jsonStr.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            print("[Ampliky] JSON parse failed")
             return nil
         }
 
-        // Extract trigger
+        // Step 3: Extract trigger
         guard let triggerObj = json["trigger"] as? [String: Any],
               let triggerType = triggerObj["type"] as? String else {
+            print("[Ampliky] Missing trigger in JSON")
             return nil
         }
 
@@ -210,14 +218,18 @@ class NLTInputWindow: NSWindow {
             guard let count = triggerObj["count"] as? Int else { return nil }
             trigger = .display(count: count)
         case "time":
-            guard let from = triggerObj["from"] as? String, let to = triggerObj["to"] as? String else { return nil }
+            guard let from = triggerObj["from"] as? String,
+                  let to = triggerObj["to"] as? String else { return nil }
             trigger = .time(from: from, to: to)
         default:
             return nil
         }
 
-        // Extract script
-        guard let script = json["script"] as? String else { return nil }
+        // Step 4: Extract script
+        guard let script = json["script"] as? String, !script.isEmpty else {
+            print("[Ampliky] Missing script in JSON")
+            return nil
+        }
 
         return (trigger, script)
     }
