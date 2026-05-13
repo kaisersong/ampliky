@@ -7,7 +7,11 @@ class MenuBarController: NSObject {
     private var shortcutListWindow: ShortcutListWindow?
     private var logWindow: LogWindow?
     private var debugLogWindow: LogViewerWindow?
+    #if DEBUG
+    private var debugOverlayEnabled = true
+    #else
     private var debugOverlayEnabled = false
+    #endif
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -16,6 +20,11 @@ class MenuBarController: NSObject {
             button.image?.isTemplate = true
         }
         buildMenu()
+        #if DEBUG
+        if debugOverlayEnabled {
+            DebugOverlayWindow.show()
+        }
+        #endif
     }
 
     private func buildMenu() {
