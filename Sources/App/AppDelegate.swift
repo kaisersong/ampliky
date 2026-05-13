@@ -1,7 +1,7 @@
 import AppKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    let menuBar = MenuBarController()
+    var menuBar: MenuBarController?
     let configStore = ConfigStore()
     let contextMonitor = ContextMonitor()
     let jscRunner = JSCRunner()
@@ -10,7 +10,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var socketServer: SocketServer!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        menuBar.setup()
+        // Only create menubar if user hasn't chosen silent mode
+        if configStore.shouldShowMenubar() {
+            menuBar = MenuBarController()
+            menuBar?.setup()
+        }
 
         let rules = configStore.loadRules()
         ruleEngine = RuleEngine(rules: rules)

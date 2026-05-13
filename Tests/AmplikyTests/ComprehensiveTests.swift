@@ -165,6 +165,45 @@ final class RuleEngineScriptTests: XCTestCase {
     }
 }
 
+// MARK: - Preferences tests
+
+final class PreferencesTests: XCTestCase {
+    var tempDir: URL!
+    var store: ConfigStore!
+
+    override func setUp() {
+        tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try! FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        store = ConfigStore(configDir: tempDir)
+    }
+
+    override func tearDown() {
+        try? FileManager.default.removeItem(at: tempDir)
+    }
+
+    func testDefaultShowMenubarIsTrue() {
+        XCTAssertTrue(store.shouldShowMenubar())
+    }
+
+    func testSetShowMenubarFalse() {
+        store.setShowMenubar(false)
+        let store2 = ConfigStore(configDir: tempDir)
+        XCTAssertFalse(store2.shouldShowMenubar())
+    }
+
+    func testSetShowMenubarTrue() {
+        store.setShowMenubar(true)
+        let store2 = ConfigStore(configDir: tempDir)
+        XCTAssertTrue(store2.shouldShowMenubar())
+    }
+
+    func testPreferencePersistsAcrossInstances() {
+        store.setShowMenubar(false)
+        let store2 = ConfigStore(configDir: tempDir)
+        XCTAssertFalse(store2.shouldShowMenubar())
+    }
+}
+
 // MARK: - Dry-run tests
 
 final class JSCDryRunTests: XCTestCase {

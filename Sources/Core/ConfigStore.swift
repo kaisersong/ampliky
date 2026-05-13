@@ -89,10 +89,12 @@ enum RuleTrigger: Codable, Equatable {
 class ConfigStore {
     private let rulesFile: URL
     let scriptsDir: URL
+    private let prefsFile: URL
 
     init(configDir: URL) {
         self.rulesFile = configDir.appendingPathComponent("rules.json")
         self.scriptsDir = configDir.appendingPathComponent("scripts")
+        self.prefsFile = configDir.appendingPathComponent("prefs.json")
         try? FileManager.default.createDirectory(at: scriptsDir, withIntermediateDirectories: true)
     }
 
@@ -130,5 +132,21 @@ class ConfigStore {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try? encoder.encode(rules)
         try? data?.write(to: rulesFile, options: .atomic)
+    }
+
+    // MARK: - Preferences
+
+    func shouldShowMenubar() -> Bool {
+        guard let data = try? Data(contentsOf: prefsFile),
+              let prefs = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return true // default: show menubar
+        }
+        return prefs["showMenubar"] as? Bool ?? true
+    }
+
+    func setShowMenubar(_ show: Bool) {
+        let prefs: [String: Any] = ["showMenubar": show]
+        let data = try? JSONSerialization.data(withJSONObject: prefs)
+        try? data?.write(to: prefsFile, options: .atomic)
     }
 }
