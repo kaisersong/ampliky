@@ -33,6 +33,7 @@ enum SystemPrompt {
     必须且只能输出以下格式的 JSON 对象：
     {"trigger":{"type":"hotkey","key":"cmd+opt+right"},"script":"Ampliky.cursor.warpNext()","description":"跳到下一个屏幕"}
 
+    触发器类型只能是 hotkey（默认）。不要使用 gesture、wifi、display、time 等其他类型。
     如果用户没有指定触发方式，默认用 hotkey，选一个合理的快捷键组合。
     """
 

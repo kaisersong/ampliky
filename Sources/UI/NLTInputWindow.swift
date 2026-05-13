@@ -222,7 +222,13 @@ class NLTInputWindow: NSWindow {
                   let to = triggerObj["to"] as? String else { return nil }
             trigger = .time(from: from, to: to)
         default:
-            return nil
+            // Fallback: if LLM returned an unknown trigger type, default to hotkey
+            // This ensures we always get a valid shortcut even if LLM is creative
+            if let key = triggerObj["key"] as? String {
+                trigger = .hotkey(key: key)
+            } else {
+                trigger = .hotkey(key: "cmd+opt+g")
+            }
         }
 
         // Step 4: Extract script
