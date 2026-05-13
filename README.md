@@ -34,14 +34,87 @@ Ampliky replaces the need to learn scripting syntax with natural language input.
 - `Ampliky.system.clipboard()` — Read/write clipboard
 
 ### CLI Interface
+
 ```bash
-ampliky run '{"name":"teleportCursor","params":{"to":"next_screen"}}'
+# Execute JavaScript directly in Ampliky's JSC engine
+ampliky run 'Ampliky.cursor.warpNext()'
+
+# Execute action by name
+ampliky exec '{"name":"teleportCursor","params":{"to":"next_screen"}}'
+
+# Manage rules
 ampliky rule list
+ampliky rule remove <rule-id>
+
+# Get context
 ampliky context
 ```
 
-### Agent Hook
-External agents can control Ampliky via Unix Domain Socket (JSON-RPC 2.0), enabling AI assistants to manipulate your Mac without writing AppleScript.
+### AI Agent Usage
+
+Ampliky is designed for AI agent integration. Agents can control your Mac through two interfaces:
+
+**1. CLI Mode** — Best for simple, one-off commands:
+
+```bash
+# Read screen info
+ampliky context
+
+# Execute a JavaScript expression
+ampliky run 'Ampliky.cursor.warpNext()'
+
+# Execute an action
+ampliky exec '{"name":"cursorPosition","params":{}}'
+```
+
+**2. Socket Mode** — Best for batch operations and real-time interaction:
+
+```bash
+# Connect via Unix socket (JSON-RPC 2.0)
+echo '{"jsonrpc":"2.0","method":"context","params":{},"id":1}' | nc -U ~/.ampliky/ampliky.sock -w 1
+```
+
+**Available RPC Methods:**
+
+| Method | Params | Returns | Description |
+|--------|--------|---------|-------------|
+| `run` | `{"script": "..."}` | `{success, output}` | Execute JavaScript |
+| `exec` | `{"name": "...", "params": {...}}` | `{success, ...}` | Execute action by name |
+| `context` | `{}` | `{screens: N}` | Get current context |
+| `rule.list` | `{}` | `{rules: [...]}` | List all rules |
+| `rule.remove` | `{"id": "..."}` | `{removed: true}` | Remove a rule |
+
+**Built-in Actions for `exec`:**
+
+| Name | Params | Description |
+|------|--------|-------------|
+| `teleportCursor` | `{"to": "next_screen\|"prev_screen\|"center"}` | Jump cursor |
+| `screenCount` | `{}` | Get screen count |
+| `cursorPosition` | `{}` | Get cursor position |
+
+**Example AI Agent Workflow:**
+
+```python
+# Python example: AI agent controlling Ampliky via socket
+import socket, json
+
+def amplify_call(method, params=None, req_id=1):
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(os.path.expanduser("~/.ampliky/ampliky.sock"))
+    request = {"jsonrpc": "2.0", "method": method, "params": params or {}, "id": req_id}
+    sock.sendall(json.dumps(request).encode())
+    response = sock.recv(4096).decode()
+    sock.close()
+    return json.loads(response)
+
+# Get screen count
+ctx = amplify_call("context")
+print(f"Screens: {ctx['result']['screens']}")
+
+# Jump cursor to next screen
+result = amplify_call("exec", {"name": "teleportCursor", "params": {"to": "next_screen"}})
+print(f"Success: {result['result']['success']}")
+```
 
 ---
 

@@ -34,14 +34,87 @@ Ampliky 让你无需学习脚本语法，只需告诉它你想做什么，它就
 - `Ampliky.system.clipboard()` — 读写剪贴板
 
 ### 命令行接口
+
 ```bash
-ampliky run '{"name":"teleportCursor","params":{"to":"next_screen"}}'
+# 直接在 Ampliky 的 JSC 引擎中执行 JavaScript
+ampliky run 'Ampliky.cursor.warpNext()'
+
+# 按名称执行动作
+ampliky exec '{"name":"teleportCursor","params":{"to":"next_screen"}}'
+
+# 管理规则
 ampliky rule list
+ampliky rule remove <规则ID>
+
+# 获取上下文
 ampliky context
 ```
 
-### Agent Hook
-外部 Agent 可通过 Unix Domain Socket (JSON-RPC 2.0) 控制 Ampliky，让 AI 助手无需写 AppleScript 即可操控你的 Mac。
+### AI Agent 使用指南
+
+Ampliky 专为 AI Agent 集成设计。Agent 可通过两种接口控制你的 Mac：
+
+**1. CLI 模式** — 适合简单的一次性命令：
+
+```bash
+# 读取屏幕信息
+ampliky context
+
+# 执行 JavaScript 表达式
+ampliky run 'Ampliky.cursor.warpNext()'
+
+# 执行动作
+ampliky exec '{"name":"cursorPosition","params":{}}'
+```
+
+**2. Socket 模式** — 适合批量操作和实时交互：
+
+```bash
+# 通过 Unix socket 连接 (JSON-RPC 2.0)
+echo '{"jsonrpc":"2.0","method":"context","params":{},"id":1}' | nc -U ~/.ampliky/ampliky.sock -w 1
+```
+
+**可用 RPC 方法：**
+
+| 方法 | 参数 | 返回 | 描述 |
+|------|------|------|------|
+| `run` | `{"script": "..."}` | `{success, output}` | 执行 JavaScript |
+| `exec` | `{"name": "...", "params": {...}}` | `{success, ...}` | 按名称执行动作 |
+| `context` | `{}` | `{screens: N}` | 获取当前上下文 |
+| `rule.list` | `{}` | `{rules: [...]}` | 列出所有规则 |
+| `rule.remove` | `{"id": "..."}` | `{removed: true}` | 删除规则 |
+
+**`exec` 可用动作：**
+
+| 名称 | 参数 | 描述 |
+|------|------|------|
+| `teleportCursor` | `{"to": "next_screen\|"prev_screen\|"center"}` | 跳转光标 |
+| `screenCount` | `{}` | 获取屏幕数量 |
+| `cursorPosition` | `{}` | 获取光标位置 |
+
+**AI Agent 示例工作流：**
+
+```python
+# Python 示例：AI Agent 通过 socket 控制 Ampliky
+import socket, json, os
+
+def amplify_call(method, params=None, req_id=1):
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(os.path.expanduser("~/.ampliky/ampliky.sock"))
+    request = {"jsonrpc": "2.0", "method": method, "params": params or {}, "id": req_id}
+    sock.sendall(json.dumps(request).encode())
+    response = sock.recv(4096).decode()
+    sock.close()
+    return json.loads(response)
+
+# 获取屏幕数量
+ctx = amplify_call("context")
+print(f"屏幕数: {ctx['result']['screens']}")
+
+# 光标跳到下一个屏幕
+result = amplify_call("exec", {"name": "teleportCursor", "params": {"to": "next_screen"}})
+print(f"成功: {result['result']['success']}")
+```
 
 ---
 
