@@ -225,7 +225,11 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         let idx = providerPopup.indexOfSelectedItem
         let provider = LLMProvider.all[idx]
         updateModelPopup(models: provider.availableModels, defaultModel: provider.defaultModel)
-        if baseUrlField.stringValue.isEmpty { baseUrlField.placeholderString = provider.baseUrl }
+        // Auto-fill default baseUrl if user hasn't set a custom one
+        let currentBase = baseUrlField.stringValue
+        if currentBase.isEmpty {
+            baseUrlField.stringValue = provider.baseUrl
+        }
     }
 
     private func updateModelPopup(models: [String], defaultModel: String) {
@@ -272,7 +276,12 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         if let idx = LLMProvider.all.firstIndex(where: { $0.id == config.provider }) { providerPopup.selectItem(at: idx) }
         updateModelPopup(models: provider.availableModels, defaultModel: config.model.isEmpty ? provider.defaultModel : config.model)
         if !config.apiKey.isEmpty { apiKeyField.stringValue = config.apiKey; isKeyVisible = true }
-        if !config.baseUrl.isEmpty { baseUrlField.stringValue = config.baseUrl }
+        // Auto-fill default baseUrl if not saved
+        if !config.baseUrl.isEmpty {
+            baseUrlField.stringValue = config.baseUrl
+        } else {
+            baseUrlField.stringValue = provider.baseUrl
+        }
         showMenubarCheckbox?.state = prefs.shouldShowMenubar() ? .on : .off
         launchAtLoginCheckbox?.state = LaunchAtLogin.isEnabled ? .on : .off
         autoUpdateCheckbox?.state = prefs.shouldAutoUpdate() ? .on : .off
@@ -305,7 +314,11 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         config.provider = LLMProvider.all[providerPopup.indexOfSelectedItem].id
         config.model = modelPopup.titleOfSelectedItem ?? config.model
         config.apiKey = apiKeyField.stringValue
-        config.baseUrl = baseUrlField.stringValue
+        // Only save baseUrl if user changed it from the default
+        let provider = LLMProvider.all[providerPopup.indexOfSelectedItem]
+        if baseUrlField.stringValue != provider.baseUrl {
+            config.baseUrl = baseUrlField.stringValue
+        }
         return config
     }
 }

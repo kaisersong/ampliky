@@ -22,7 +22,7 @@ struct LLMProvider: Identifiable, Hashable {
         LLMProvider(id: "kimi", label: "Kimi", baseUrl: "https://api.kimi.com/coding/v1",
                      defaultModel: "kimi-for-coding", availableModels: ["kimi-for-coding"],
                      apiProtocol: .openai),
-        LLMProvider(id: "deepseek", label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1",
+        LLMProvider(id: "deepseek", label: "DeepSeek", baseUrl: "https://api.deepseek.com",
                      defaultModel: "deepseek-v4-pro", availableModels: ["deepseek-v4-pro", "deepseek-v4-flash"],
                      apiProtocol: .openai),
         LLMProvider(id: "glm", label: "智谱 GLM", baseUrl: "https://open.bigmodel.cn/api/paas/v4",
