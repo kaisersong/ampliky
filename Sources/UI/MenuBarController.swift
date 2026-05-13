@@ -6,6 +6,8 @@ class MenuBarController: NSObject {
     private var nltWindow: NLTInputWindow?
     private var shortcutListWindow: ShortcutListWindow?
     private var logWindow: LogWindow?
+    private var debugLogWindow: LogViewerWindow?
+    private var debugOverlayEnabled = false
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -24,16 +26,24 @@ class MenuBarController: NSObject {
         addItem(menu, "运行日志", #selector(openLog))
         menu.addItem(NSMenuItem.separator())
 
-        // Settings
         addItem(menu, "设置", #selector(openSettings))
         menu.addItem(NSMenuItem.separator())
 
-        // Hide/show with shortcut
+        // Hide/show menubar
         let hideTitle = ConfigStore().shouldShowMenubar() ? "隐藏图标" : "显示图标"
         let hideItem = NSMenuItem(title: hideTitle, action: #selector(toggleMenubar), keyEquivalent: "h")
         hideItem.keyEquivalentModifierMask = [.command, .option, .control]
         hideItem.target = self
         menu.addItem(hideItem)
+
+        // Debug mode
+        let debugTitle = debugOverlayEnabled ? "🔧 关闭调试模式" : "🔧 打开调试模式"
+        let debugItem = NSMenuItem(title: debugTitle, action: #selector(toggleDebug), keyEquivalent: "")
+        debugItem.target = self
+        menu.addItem(debugItem)
+
+        // Log viewer
+        addItem(menu, "📜 日志查看器", #selector(openDebugLog))
 
         // About
         addItem(menu, "关于 Ampliky", #selector(showAbout))
@@ -76,20 +86,51 @@ class MenuBarController: NSObject {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    @objc private func openDebugLog() {
+        if debugLogWindow == nil { debugLogWindow = LogViewerWindow() }
+        debugLogWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     @objc private func toggleMenubar() {
         let store = ConfigStore()
         let current = store.shouldShowMenubar()
         store.setShowMenubar(!current)
-        Logger.shared.log(level: .info, message: "切换菜单图标: \(!current ? "显示" : "隐藏")")
-        // Rebuild menu to update the item text
+        Logger.shared.log(level: .info, message: "切换菜单图标")
         buildMenu()
         if !current {
             let alert = NSAlert()
             alert.messageText = "图标已隐藏"
-            alert.informativeText = "使用 ⌘⌥⌃H 可以重新显示图标。"
+            alert.informativeText = "使用快捷键可重新显示。"
             alert.addButton(withTitle: "确定")
             alert.runModal()
         }
+    }
+
+    @objc private func toggleDebug() {
+        debugOverlayEnabled.toggle()
+        if debugOverlayEnabled {
+            DebugOverlayWindow.show()
+            Logger.shared.log(level: .debug, message: "调试模式已开启")
+            DebugOverlayWindow.flash("🔧 调试模式已开启")
+        } else {
+            DebugOverlayWindow.hide()
+            Logger.shared.log(level: .debug, message: "调试模式已关闭")
+        }
+        buildMenu()
+    }
+
+    func notifyShortcutFired(_ rule: Rule) {
+        let shortcut: String
+        switch rule.trigger {
+        case .hotkey(let key): shortcut = key
+        default: shortcut = rule.name
+        }
+        ActionToast.show(action: rule.name, shortcut: shortcut)
+        if debugOverlayEnabled {
+            DebugOverlayWindow.flash("⚡ \(shortcut) → \(rule.name)")
+        }
+        Logger.shared.log(level: .debug, message: "触发: \(shortcut) → \(rule.name)")
     }
 
     @objc private func showAbout() {
@@ -122,5 +163,6 @@ extension MenuBarController: NSWindowDelegate {
         if window === nltWindow { nltWindow = nil }
         if window === shortcutListWindow { shortcutListWindow = nil }
         if window === logWindow { logWindow = nil }
+        if window === debugLogWindow { debugLogWindow = nil }
     }
 }

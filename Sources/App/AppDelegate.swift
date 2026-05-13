@@ -69,6 +69,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func executeRule(_ rule: Rule) {
+        // Visual feedback
+        menuBar?.notifyShortcutFired(rule)
+
         guard let scriptPath = rule.scriptPath else {
             for action in rule.actions {
                 executeFallbackAction(action)
@@ -76,10 +79,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         let fullPath = configStore.scriptsDir.appendingPathComponent(scriptPath).path
-        guard let script = try? String(contentsOfFile: fullPath) else { return }
+        guard let script = try? String(contentsOfFile: fullPath, encoding: .utf8) else {
+            Logger.shared.log(level: .error, message: "找不到脚本: \(scriptPath)")
+            menuBar?.notifyShortcutFired(rule)
+            return
+        }
         let result = jscRunner.execute(script: script)
         if !result.success, let error = result.error {
             print("[Ampliky] script error: \(error)")
+            Logger.shared.log(level: .error, message: "脚本错误: \(error)")
+        } else {
+            Logger.shared.log(level: .info, message: "执行成功: \(rule.name)")
         }
     }
 
