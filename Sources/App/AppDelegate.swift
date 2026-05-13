@@ -10,6 +10,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var socketServer: SocketServer!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Set up main menu with Edit menu (required for Cmd+V paste to work in LSUIElement app)
+        let mainMenu = NSMenu(title: "Main Menu")
+        let editMenu = NSMenu(title: "Edit")
+        let editMenuItem = NSMenuItem(title: "Edit", action: nil, keyEquivalent: "")
+        editMenuItem.submenu = editMenu
+
+        // Standard edit commands for paste support
+        editMenu.addItem(withTitle: "Undo", action: #selector(UndoManager.undo), keyEquivalent: "z")
+        editMenu.addItem(withTitle: "Redo", action: #selector(UndoManager.redo), keyEquivalent: "Z")
+        editMenu.addItem(NSMenuItem.separator())
+        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+
+        mainMenu.addItem(editMenuItem)
+        NSApp.mainMenu = mainMenu
+
         // Only create menubar if user hasn't chosen silent mode
         if configStore.shouldShowMenubar() {
             menuBar = MenuBarController()
