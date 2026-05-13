@@ -1,11 +1,11 @@
 import AppKit
 import Foundation
 
-// MARK: - Debug Overlay - a thin bar at the top of the screen
+// MARK: - Debug Toast - small toast at top center of screen (below notch)
 
 class DebugOverlayWindow: NSWindow {
     private var statusLabel: NSTextField!
-    private var timer: Timer?
+    private var flashTimer: Timer?
     private static var shared: DebugOverlayWindow?
 
     static func show() {
@@ -20,85 +20,85 @@ class DebugOverlayWindow: NSWindow {
         shared = nil
     }
 
-    static func flash(_ message: String, duration: Double = 3.0) {
+    static func flash(_ message: String, duration: Double = 2.0) {
         if shared == nil {
             shared = DebugOverlayWindow()
-            shared?.makeKeyAndOrderFront(nil)
         }
         shared?.statusLabel.stringValue = message
-        // Fade out after duration
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+        shared?.makeKeyAndOrderFront(nil)
+        // Auto-hide after duration
+        shared?.flashTimer?.invalidate()
+        shared?.flashTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
             shared?.statusLabel.stringValue = ""
+            shared?.orderOut(nil)
         }
     }
 
     init() {
-        // Get primary screen frame
-        if let screen = NSScreen.main {
-            let frame = NSRect(x: screen.frame.origin.x,
-                              y: screen.frame.maxY - 24,
-                              width: screen.frame.width,
-                              height: 24)
-            super.init(contentRect: frame, styleMask: [.borderless],
-                       backing: .buffered, defer: false)
-        } else {
-            super.init(contentRect: NSRect(x: 0, y: 0, width: 1920, height: 24),
-                       styleMask: [.borderless],
-                       backing: .buffered, defer: false)
-        }
+        // Small toast at top center, below the notch/dynamic island
+        let screen = NSScreen.main ?? NSScreen.screens.first!
+        let screenWidth = screen.frame.width
+        let toastWidth: CGFloat = 300
+        let toastHeight: CGFloat = 28
+        let frame = NSRect(
+            x: screen.frame.origin.x + (screenWidth - toastWidth) / 2,
+            y: screen.frame.maxY - 56, // below the notch
+            width: toastWidth,
+            height: toastHeight
+        )
+        super.init(contentRect: frame, styleMask: [.borderless],
+                   backing: .buffered, defer: false)
 
-        backgroundColor = NSColor.black.withAlphaComponent(0.85)
+        backgroundColor = NSColor.black.withAlphaComponent(0.7)
         isOpaque = false
-        level = .screenSaver
+        level = .floating
         ignoresMouseEvents = true
-        collectionBehavior = [.canJoinAllSpaces, .stationary]
+        collectionBehavior = [.canJoinAllSpaces, .transient]
 
-        statusLabel = NSTextField(labelWithString: "Ampliky Debug — 监听中...")
-        statusLabel.frame = NSRect(x: 10, y: 3, width: contentView!.frame.width - 20, height: 18)
-        statusLabel.textColor = .systemGreen
-        statusLabel.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
-        statusLabel.alignment = .left
+        statusLabel = NSTextField(labelWithString: "")
+        statusLabel.frame = NSRect(x: 10, y: 4, width: toastWidth - 20, height: 20)
+        statusLabel.textColor = NSColor.systemGreen
+        statusLabel.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .medium)
+        statusLabel.alignment = .center
         contentView?.addSubview(statusLabel)
     }
 }
 
-// MARK: - Action Feedback Toast
+// MARK: - Action Feedback Toast - shown near cursor
 
 class ActionToast {
     private static var toastWindow: NSWindow?
     private static var fadeTimer: Timer?
 
     static func show(action: String, shortcut: String? = nil) {
-        let message = shortcut != nil ? "⚡ \(shortcut!) → \(action)" : "⚡ \(action)"
+        let message = shortcut != nil ? "\(shortcut!) -> \(action)" : action
 
         if let existing = toastWindow {
             existing.orderOut(nil)
         }
 
-        // Get current cursor position for toast placement
         let mouseLoc = NSEvent.mouseLocation
-        let frame = NSRect(x: mouseLoc.x - 100, y: mouseLoc.y + 30, width: 200, height: 32)
+        let frame = NSRect(x: mouseLoc.x - 80, y: mouseLoc.y + 24, width: 160, height: 28)
         let window = NSWindow(contentRect: frame, styleMask: [.borderless],
                               backing: .buffered, defer: false)
-        window.backgroundColor = NSColor.black.withAlphaComponent(0.75)
+        window.backgroundColor = NSColor.black.withAlphaComponent(0.65)
         window.isOpaque = false
         window.level = .floating
         window.ignoresMouseEvents = true
         window.collectionBehavior = [.canJoinAllSpaces, .transient]
 
         let label = NSTextField(labelWithString: message)
-        label.frame = NSRect(x: 10, y: 6, width: 180, height: 20)
+        label.frame = NSRect(x: 8, y: 5, width: 144, height: 18)
         label.textColor = .white
-        label.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         label.alignment = .center
         window.contentView?.addSubview(label)
 
         window.makeKeyAndOrderFront(nil)
         toastWindow = window
 
-        // Auto-hide after 2 seconds
         fadeTimer?.invalidate()
-        fadeTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+        fadeTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
             window.orderOut(nil)
             toastWindow = nil
         }
@@ -115,7 +115,7 @@ class LogViewerWindow: NSWindow {
         super.init(contentRect: NSRect(x: 0, y: 0, width: 600, height: 300),
                    styleMask: [.titled, .closable, .resizable, .miniaturizable],
                    backing: .buffered, defer: false)
-        title = "Ampliky 调试日志"
+        title = "Ampliky Debug Log"
         isReleasedWhenClosed = false
         center()
 
@@ -131,7 +131,6 @@ class LogViewerWindow: NSWindow {
         scroll.documentView = textView
         contentView?.addSubview(scroll)
 
-        // Refresh every 1 second
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.refresh()
         }
@@ -143,14 +142,14 @@ class LogViewerWindow: NSWindow {
         let logFile = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".ampliky/logs.json")
         guard let data = try? Data(contentsOf: logFile),
               let logs = try? JSONDecoder().decode([LogEntry].self, from: data) else {
-            textView?.string = "暂无日志"
+            textView?.string = "No logs yet"
             return
         }
 
         var text = ""
         for entry in logs.reversed() {
             let level = entry.level.rawValue
-            let icon = level == "ERROR" ? "❌" : (level == "DEBUG" ? "🔧" : "✅")
+            let icon = level == "ERROR" ? "[ERR]" : (level == "DEBUG" ? "[DBG]" : "[INF]")
             let formatter = DateFormatter()
             formatter.dateFormat = "HH:mm:ss"
             let time = formatter.string(from: entry.timestamp)

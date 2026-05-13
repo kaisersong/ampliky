@@ -37,13 +37,13 @@ class MenuBarController: NSObject {
         menu.addItem(hideItem)
 
         // Debug mode
-        let debugTitle = debugOverlayEnabled ? "🔧 关闭调试模式" : "🔧 打开调试模式"
+        let debugTitle = debugOverlayEnabled ? "关闭调试模式" : "打开调试模式"
         let debugItem = NSMenuItem(title: debugTitle, action: #selector(toggleDebug), keyEquivalent: "")
         debugItem.target = self
         menu.addItem(debugItem)
 
         // Log viewer
-        addItem(menu, "📜 日志查看器", #selector(openDebugLog))
+        addItem(menu, "日志查看器", #selector(openDebugLog))
 
         // About
         addItem(menu, "关于 Ampliky", #selector(showAbout))
@@ -112,7 +112,7 @@ class MenuBarController: NSObject {
         if debugOverlayEnabled {
             DebugOverlayWindow.show()
             Logger.shared.log(level: .debug, message: "调试模式已开启")
-            DebugOverlayWindow.flash("🔧 调试模式已开启")
+            DebugOverlayWindow.flash("调试模式已开启")
         } else {
             DebugOverlayWindow.hide()
             Logger.shared.log(level: .debug, message: "调试模式已关闭")
@@ -128,7 +128,7 @@ class MenuBarController: NSObject {
         }
         ActionToast.show(action: rule.name, shortcut: shortcut)
         if debugOverlayEnabled {
-            DebugOverlayWindow.flash("⚡ \(shortcut) → \(rule.name)")
+            DebugOverlayWindow.flash("\(shortcut) -> \(rule.name)")
         }
         Logger.shared.log(level: .debug, message: "触发: \(shortcut) → \(rule.name)")
     }
