@@ -1,7 +1,7 @@
 import AppKit
 import ServiceManagement
 
-class SettingsWindowController: NSWindowController, NSWindowDelegate {
+class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTextFieldDelegate {
 
     private var containerView: NSView!
     private var tabBar: NSView!
@@ -59,13 +59,18 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func windowWillClose(_ notification: Notification) {
-        print("[Ampliky] Settings window closing, saving...")
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        print("[Ampliky] windowShouldClose - saving settings")
         save()
+        return true
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        print("[Ampliky] windowWillClose - already saved in windowShouldClose")
     }
 
     override func cancelOperation(_ sender: Any?) {
-        // Called when user clicks close button or presses Cmd+W
+        print("[Ampliky] cancelOperation - saving settings")
         save()
         window?.orderOut(sender)
     }
@@ -132,6 +137,8 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         addLabel("模型")
         modelPopup = NSPopUpButton(frame: NSRect(x: rightX, y: y - 2, width: fw, height: 28))
         modelPopup.font = NSFont.systemFont(ofSize: 13)
+        modelPopup.target = self
+        modelPopup.action = #selector(modelChanged)
         view.addSubview(modelPopup); y -= 40
 
         addLabel("API Key")
@@ -140,6 +147,7 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         apiKeyField.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
         apiKeyField.placeholderString = "sk-..."
         apiKeyField.backgroundColor = NSColor.controlBackgroundColor
+        apiKeyField.delegate = self
         view.addSubview(apiKeyField)
 
         apiKeyToggleBtn = NSButton(frame: NSRect(x: rightX + fw - 28, y: y - 2, width: 28, height: 28))
@@ -154,6 +162,7 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         baseUrlField.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
         baseUrlField.placeholderString = "留空使用默认"
         baseUrlField.backgroundColor = NSColor.controlBackgroundColor
+        baseUrlField.delegate = self
         view.addSubview(baseUrlField); y -= 55
 
         llmStatusLabel = NSTextField(labelWithString: "未配置")
@@ -175,7 +184,7 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         var y: CGFloat = view.frame.height - 25
 
         func addCheckbox(_ text: String) -> NSButton {
-            let cb = NSButton(checkboxWithTitle: text, target: nil, action: nil)
+            let cb = NSButton(checkboxWithTitle: text, target: self, action: #selector(checkboxChanged))
             cb.frame = NSRect(x: padding, y: y, width: 200, height: 24)
             cb.font = NSFont.systemFont(ofSize: 13)
             view.addSubview(cb); y -= 30; return cb
@@ -234,6 +243,12 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         updateModelPopup(models: provider.availableModels, defaultModel: provider.defaultModel)
         // Always update baseUrl when provider changes
         baseUrlField.stringValue = provider.baseUrl
+        // Auto-save immediately
+        save()
+    }
+
+    @objc private func modelChanged() {
+        save()
     }
 
     private func updateModelPopup(models: [String], defaultModel: String) {
@@ -283,12 +298,8 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         if let idx = LLMProvider.all.firstIndex(where: { $0.id == config.provider }) { providerPopup.selectItem(at: idx) }
         updateModelPopup(models: provider.availableModels, defaultModel: config.model.isEmpty ? provider.defaultModel : config.model)
         if !config.apiKey.isEmpty { apiKeyField.stringValue = config.apiKey; isKeyVisible = true }
-        // Auto-fill default baseUrl if not saved
-        if !config.baseUrl.isEmpty {
-            baseUrlField.stringValue = config.baseUrl
-        } else {
-            baseUrlField.stringValue = provider.baseUrl
-        }
+        // Always fill baseUrl from config or provider default
+        baseUrlField.stringValue = config.baseUrl.isEmpty ? provider.baseUrl : config.baseUrl
         showMenubarCheckbox?.state = prefs.shouldShowMenubar() ? .on : .off
         launchAtLoginCheckbox?.state = LaunchAtLogin.isEnabled ? .on : .off
         autoUpdateCheckbox?.state = prefs.shouldAutoUpdate() ? .on : .off
@@ -315,6 +326,17 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         prefs.setAutoUpdate(autoUpdateCheckbox?.state == .on)
         Logger.shared.log(level: .info, message: "保存设置")
         updatePermissionStatus()
+    }
+
+    @objc private func checkboxChanged() {
+        save()
+    }
+
+    // MARK: - NSTextFieldDelegate - auto-save on text change
+
+    func controlTextDidChange(_ obj: Notification) {
+        // Auto-save whenever API key or Base URL changes
+        save()
     }
 
     private func buildLLMConfig() -> LLMConfig {
