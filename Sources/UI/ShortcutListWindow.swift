@@ -2,12 +2,13 @@ import AppKit
 
 // MARK: - Modern Shortcut List Window
 
-class ShortcutListWindow: NSWindow {
+class ShortcutListWindow: NSWindow, ShortcutListWindowDelegate {
     private var tableView: NSTableView!
     private var shortcuts: [Rule] = []
+    private var editWindow: EditShortcutWindow?
 
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 580, height: 380),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 620, height: 380),
                    styleMask: [.titled, .closable, .resizable],
                    backing: .buffered, defer: false)
         title = "快捷指令列表"
@@ -34,6 +35,13 @@ class ShortcutListWindow: NSWindow {
         tableView.gridStyleMask = .solidHorizontalGridLineMask
         tableView.selectionHighlightStyle = .regular
         tableView.focusRingType = .none
+        tableView.doubleAction = #selector(doubleClickRow)
+
+        // Edit column
+        let editCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("edit"))
+        editCol.title = ""
+        editCol.minWidth = 50; editCol.maxWidth = 50
+        tableView.addTableColumn(editCol)
 
         // Enable/disable column
         let enabledCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("enabled"))
@@ -60,8 +68,8 @@ class ShortcutListWindow: NSWindow {
         tableView.delegate = self
         scroll.documentView = tableView
 
-        let deleteBtn = NSButton(title: "删除选中", target: self, action: #selector(deleteSelected))
-        deleteBtn.frame = NSRect(x: 15, y: 5, width: 70, height: 30)
+        let deleteBtn = NSButton(title: "删除", target: self, action: #selector(deleteSelected))
+        deleteBtn.frame = NSRect(x: 15, y: 5, width: 50, height: 30)
         deleteBtn.bezelStyle = .rounded
         deleteBtn.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         toolbar.addSubview(deleteBtn)
@@ -94,13 +102,44 @@ class ShortcutListWindow: NSWindow {
         }
     }
 
+    @objc private func doubleClickRow() {
+        let row = tableView.clickedRow
+        guard row >= 0 && row < shortcuts.count else { return }
+        openEditWindow(for: shortcuts[row])
+    }
+
+    @objc private func editShortcut(_ sender: NSButton) {
+        let row = sender.tag
+        guard row >= 0 && row < shortcuts.count else { return }
+        openEditWindow(for: shortcuts[row])
+    }
+
+    private func openEditWindow(for shortcut: Rule) {
+        if editWindow == nil {
+            editWindow = EditShortcutWindow(shortcut: shortcut)
+            editWindow?.parentDelegate = self
+        } else {
+            // Update existing edit window with new shortcut
+            editWindow?.close()
+            editWindow = EditShortcutWindow(shortcut: shortcut)
+            editWindow?.parentDelegate = self
+        }
+        editWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    // MARK: - ShortcutListWindowDelegate
+
+    func shortcutListWindowDidUpdate() {
+        loadShortcuts()
+    }
+
     @objc private func toggleEnabled(_ sender: NSButton) {
         let row = sender.tag
         guard row >= 0 && row < shortcuts.count else { return }
         let shortcut = shortcuts[row]
         let store = ConfigStore()
 
-        // Remove old rule and add with toggled enabled
         store.removeRule(id: shortcut.id)
         let newRule = Rule(
             id: shortcut.id,
@@ -124,6 +163,14 @@ extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let shortcut = shortcuts[row]
         let columnId = tableColumn?.identifier.rawValue ?? ""
+
+        if columnId == "edit" {
+            let btn = NSButton(title: "编辑", target: self, action: #selector(editShortcut(_:)))
+            btn.tag = row
+            btn.bezelStyle = .rounded
+            btn.font = NSFont.systemFont(ofSize: 11)
+            return btn
+        }
 
         if columnId == "enabled" {
             let btn = NSButton(checkboxWithTitle: "", target: self, action: #selector(toggleEnabled(_:)))
@@ -156,8 +203,9 @@ extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
     private func triggerDescription(_ trigger: RuleTrigger) -> String {
         switch trigger {
         case .hotkey(let key): return key
+        case .gesture(let fingers, let action): return "\(fingers) finger \(action)"
         case .wifi(let ssid): return ssid
-        case .display(let count): return "\(count) 屏"
+        case .display(let count): return "\(count) screens"
         case .time(let from, let to): return "\(from) - \(to)"
         }
     }

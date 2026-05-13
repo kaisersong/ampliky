@@ -249,10 +249,11 @@ class NLTInputWindow: NSWindow {
 
     private func triggerDescription(_ trigger: RuleTrigger) -> String {
         switch trigger {
-        case .hotkey(let key): return "⌨️ \(key)"
-        case .wifi(let ssid): return "📶 \(ssid)"
-        case .display(let count): return "🖥 \(count) 屏"
-        case .time(let from, let to): return "⏰ \(from)-\(to)"
+        case .hotkey(let key): return key
+        case .gesture(let fingers, let action): return "\(fingers) finger \(action)"
+        case .wifi(let ssid): return ssid
+        case .display(let count): return "\(count) screens"
+        case .time(let from, let to): return "\(from)-\(to)"
         }
     }
 }

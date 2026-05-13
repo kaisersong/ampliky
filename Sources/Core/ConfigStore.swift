@@ -53,17 +53,22 @@ struct RuleAction: Codable, Equatable {
 
 enum RuleTrigger: Codable, Equatable {
     case hotkey(key: String)
+    case gesture(fingers: Int, action: String)
     case wifi(ssid: String)
     case display(count: Int)
     case time(from: String, to: String)
 
-    private enum CodingKeys: String, CodingKey { case type, key, ssid, count, from, to }
+    private enum CodingKeys: String, CodingKey { case type, key, fingers, action, ssid, count, from, to }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let type = try c.decode(String.self, forKey: .type)
         switch type {
         case "hotkey": self = .hotkey(key: try c.decode(String.self, forKey: .key))
+        case "gesture":
+            let fingers = try c.decode(Int.self, forKey: .fingers)
+            let action = try c.decode(String.self, forKey: .action)
+            self = .gesture(fingers: fingers, action: action)
         case "wifi": self = .wifi(ssid: try c.decode(String.self, forKey: .ssid))
         case "display": self = .display(count: try c.decode(Int.self, forKey: .count))
         case "time": self = .time(from: try c.decode(String.self, forKey: .from), to: try c.decode(String.self, forKey: .to))
@@ -75,13 +80,22 @@ enum RuleTrigger: Codable, Equatable {
         var c = encoder.container(keyedBy: CodingKeys.self)
         switch self {
         case .hotkey(let key):
-            try c.encode("hotkey", forKey: .type); try c.encode(key, forKey: .key)
+            try c.encode("hotkey", forKey: .type)
+            try c.encode(key, forKey: .key)
+        case .gesture(let fingers, let action):
+            try c.encode("gesture", forKey: .type)
+            try c.encode(fingers, forKey: .fingers)
+            try c.encode(action, forKey: .action)
         case .wifi(let ssid):
-            try c.encode("wifi", forKey: .type); try c.encode(ssid, forKey: .ssid)
+            try c.encode("wifi", forKey: .type)
+            try c.encode(ssid, forKey: .ssid)
         case .display(let count):
-            try c.encode("display", forKey: .type); try c.encode(count, forKey: .count)
+            try c.encode("display", forKey: .type)
+            try c.encode(count, forKey: .count)
         case .time(let from, let to):
-            try c.encode("time", forKey: .type); try c.encode(from, forKey: .from); try c.encode(to, forKey: .to)
+            try c.encode("time", forKey: .type)
+            try c.encode(from, forKey: .from)
+            try c.encode(to, forKey: .to)
         }
     }
 }

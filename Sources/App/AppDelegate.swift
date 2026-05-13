@@ -7,6 +7,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let jscRunner = JSCRunner()
     var ruleEngine: RuleEngine!
     var hotkeyTrigger: HotkeyTrigger!
+    var gestureTrigger: GestureTrigger!
     var socketServer: SocketServer!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -56,6 +57,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         registerHotkeys(rules: configStore.loadRules())
         hotkeyTrigger.start()
 
+        // Set up gesture trigger for trackpad gestures
+        gestureTrigger = GestureTrigger()
+        registerGestures(rules: configStore.loadRules())
+        gestureTrigger.start()
+
         socketServer = SocketServer()
         socketServer.setHandler { [weak self] request in
             self?.handleRPC(request) ?? SocketProtocol.errorResponse(id: request.id, code: -32603, message: "Internal error")
@@ -71,6 +77,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     self?.executeRule(rule)
                 }
             }
+        }
+    }
+
+    private func registerGestures(rules: [Rule]) {
+        for rule in rules {
+            guard rule.enabled else { continue }
+            switch rule.trigger {
+            case .gesture(let fingers, let action):
+                let gestureKey = gestureIdentifier(fingers: fingers, action: action)
+                gestureTrigger.register(gesture: gestureKey) { [weak self] in
+                    self?.executeRule(rule)
+                }
+                #if DEBUG
+                print("[Ampliky] Registered gesture: \(gestureKey) -> \(rule.name)")
+                #endif
+            default:
+                break
+            }
+        }
+    }
+
+    private func gestureIdentifier(fingers: Int, action: String) -> String {
+        switch (fingers, action) {
+        case (3, "tap"): return GestureTrigger.threeFingerTap
+        case (3, "swipe_up"): return GestureTrigger.threeFingerSwipeUp
+        case (3, "swipe_down"): return GestureTrigger.threeFingerSwipeDown
+        case (3, "swipe_left"): return GestureTrigger.threeFingerSwipeLeft
+        case (3, "swipe_right"): return GestureTrigger.threeFingerSwipeRight
+        default: return ""
         }
     }
 
@@ -114,16 +149,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func seedDefaultShortcuts() {
         let scriptStore = ScriptStore()
 
-        // Single shortcut: ⌘⌥↑ 跳到另一个屏幕
-        let script = "Ampliky.cursor.warpNext()"
-        let file = scriptStore.saveScript(content: script, name: "跳到另一个屏幕")
+        // Keyboard shortcut: cmd+opt+up to jump to next screen
+        let script1 = "Ampliky.cursor.warpNext()"
+        let file1 = scriptStore.saveScript(content: script1, name: "跳到另一个屏幕")
         configStore.addRule(Rule(
-            id: UUID().uuidString, name: "跳到另一个屏幕",
+            id: UUID().uuidString, name: "跳到另一个屏幕（快捷键）",
             trigger: .hotkey(key: "cmd+opt+up"),
-            actions: [], enabled: true, source: "user", scriptPath: file
+            actions: [], enabled: true, source: "user", scriptPath: file1
         ))
 
-        Logger.shared.log(level: .info, message: "初始化默认快捷指令: 跳屏 ⌘⌥↑")
+        // Gesture: three-finger tap to jump to next screen
+        let script2 = "Ampliky.cursor.warpNext()"
+        let file2 = scriptStore.saveScript(content: script2, name: "跳到另一个屏幕")
+        configStore.addRule(Rule(
+            id: UUID().uuidString, name: "跳到另一个屏幕（三指点击）",
+            trigger: .gesture(fingers: 3, action: "tap"),
+            actions: [], enabled: true, source: "user", scriptPath: file2
+        ))
+
+        Logger.shared.log(level: .info, message: "初始化默认快捷指令")
     }
 
     private func handleRPC(_ request: RPCRequest) -> Data {

@@ -34,11 +34,13 @@
 		ABE82058CDCFEC327D4CE661 /* NLTInputWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */; };
 		B7865DD0320F72C0CF3DBFFF /* PermissionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0D321EBD739251C4431B90 /* PermissionChecker.swift */; };
 		B8EE323860C3F24896B31163 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120604B2A469BBFBDDA90033 /* SettingsWindow.swift */; };
+		BB3B82FB0472CAC0F0BBD78A /* EditShortcutWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7AB08FED32809A21F94EE9D /* EditShortcutWindow.swift */; };
 		C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA3E5FF81FC344130585207 /* ScriptStore.swift */; };
 		C777810049CB03118C99CE2C /* AppAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D530725314CF2D27DAF15 /* AppAction.swift */; };
 		D78A0A3FDBCAC2F1C2AFF5CB /* ConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */; };
 		DF4C18E1D88B4DAA01E68CA9 /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D135BFFC46F2BC71F296360 /* RuleEngine.swift */; };
 		DF5E2D4A06165FB10F44E20D /* ShortcutListWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76462A8BAE4A7C2981F4CE78 /* ShortcutListWindow.swift */; };
+		E4C38EF141206FD2B7CE5682 /* GestureTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5500538519BD1F0E4EB3C4 /* GestureTrigger.swift */; };
 		E886D6BA9D9299FD16F7BEC5 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CE1B5D589E31A41CBAC2AA /* ConfigStore.swift */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +70,7 @@
 		5F099D6097967E18E668CD58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		60245B2B701DFB097ADB3820 /* CursorActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorActionTests.swift; sourceTree = "<group>"; };
 		76462A8BAE4A7C2981F4CE78 /* ShortcutListWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutListWindow.swift; sourceTree = "<group>"; };
+		7F5500538519BD1F0E4EB3C4 /* GestureTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureTrigger.swift; sourceTree = "<group>"; };
 		8661523565D6134E53758B4D /* AmplikyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AmplikyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C423CC466A68EF35C1B89DB /* Ampliky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ampliky.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F3E4C7985C03877F95D741D /* SystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPrompt.swift; sourceTree = "<group>"; };
@@ -76,6 +79,7 @@
 		9D135BFFC46F2BC71F296360 /* RuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngine.swift; sourceTree = "<group>"; };
 		A86C9ACC8A0248FF39DEAB4B /* ContextMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMonitor.swift; sourceTree = "<group>"; };
 		AC5D3B8F6F0DD5F56DE8DDFE /* SocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketServer.swift; sourceTree = "<group>"; };
+		B7AB08FED32809A21F94EE9D /* EditShortcutWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditShortcutWindow.swift; sourceTree = "<group>"; };
 		B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		BAD85EF1A3A0BF30F5610200 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BBE1AA019ACA20E560619F82 /* HotkeyTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyTriggerTests.swift; sourceTree = "<group>"; };
@@ -113,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				A86C9ACC8A0248FF39DEAB4B /* ContextMonitor.swift */,
+				7F5500538519BD1F0E4EB3C4 /* GestureTrigger.swift */,
 				07E7AAD33BFC87C1634F1356 /* HotkeyTrigger.swift */,
 			);
 			path = Triggers;
@@ -218,6 +223,7 @@
 			isa = PBXGroup;
 			children = (
 				20BBBCD597646C1687129D57 /* DebugOverlay.swift */,
+				B7AB08FED32809A21F94EE9D /* EditShortcutWindow.swift */,
 				978EEB6F592E1CE03FD02184 /* LogWindow.swift */,
 				B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */,
 				DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */,
@@ -364,6 +370,8 @@
 				8CE345209D994F543719C7D9 /* ContextMonitor.swift in Sources */,
 				9756C1F1B3AD15F239C64522 /* CursorAction.swift in Sources */,
 				771F3A08CE11809E37F91451 /* DebugOverlay.swift in Sources */,
+				BB3B82FB0472CAC0F0BBD78A /* EditShortcutWindow.swift in Sources */,
+				E4C38EF141206FD2B7CE5682 /* GestureTrigger.swift in Sources */,
 				16F63EB52B0317605452D45E /* HotkeyTrigger.swift in Sources */,
 				82B09168EBD8B593E3FAFDD9 /* JSCRunner.swift in Sources */,
 				148E491C3B3C5CB6CC0CD9D5 /* LLMClient.swift in Sources */,

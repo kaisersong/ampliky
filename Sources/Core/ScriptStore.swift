@@ -32,6 +32,11 @@ class ScriptStore {
         try? FileManager.default.removeItem(at: url)
     }
 
+    func updateScript(filename: String, content: String) {
+        let url = scriptsDir.appendingPathComponent(filename)
+        try? content.write(to: url, atomically: true, encoding: .utf8)
+    }
+
     func listScripts() -> [String] {
         ((try? FileManager.default.contentsOfDirectory(atPath: scriptsDir.path)) ?? [])
             .filter { $0.hasSuffix(".js") }
