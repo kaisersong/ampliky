@@ -77,25 +77,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func seedDefaultShortcuts() {
         let scriptStore = ScriptStore()
 
-        // Shortcut 1: ⌘⌥→ 跳到下一个屏幕
-        let script1 = "Ampliky.cursor.warpNext()"
-        let file1 = scriptStore.saveScript(content: script1, name: "跳到下一个屏幕")
+        // Single shortcut: ⌘⌥↑ 跳到另一个屏幕
+        let script = "Ampliky.cursor.warpNext()"
+        let file = scriptStore.saveScript(content: script, name: "跳到另一个屏幕")
         configStore.addRule(Rule(
-            id: UUID().uuidString, name: "跳到下一个屏幕",
-            trigger: .hotkey(key: "cmd+opt+right"),
-            actions: [], enabled: true, source: "user", scriptPath: file1
+            id: UUID().uuidString, name: "跳到另一个屏幕",
+            trigger: .hotkey(key: "cmd+opt+up"),
+            actions: [], enabled: true, source: "user", scriptPath: file
         ))
 
-        // Shortcut 2: ⌘⌥← 跳到上一个屏幕
-        let script2 = "Ampliky.cursor.warpPrev()"
-        let file2 = scriptStore.saveScript(content: script2, name: "跳到上一个屏幕")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "跳到上一个屏幕",
-            trigger: .hotkey(key: "cmd+opt+left"),
-            actions: [], enabled: true, source: "user", scriptPath: file2
-        ))
-
-        Logger.shared.log(level: .info, message: "初始化默认快捷指令: 跳屏 ⌘⌥→/←")
+        Logger.shared.log(level: .info, message: "初始化默认快捷指令: 跳屏 ⌘⌥↑")
     }
 
     private func handleRPC(_ request: RPCRequest) -> Data {

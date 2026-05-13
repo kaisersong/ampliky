@@ -1,42 +1,48 @@
 import AppKit
 
-// MARK: - Shortcut List Window
+// MARK: - Modern Shortcut List Window
 
 class ShortcutListWindow: NSWindow {
     private var tableView: NSTableView!
     private var shortcuts: [Rule] = []
 
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 580, height: 380),
                    styleMask: [.titled, .closable, .resizable],
                    backing: .buffered, defer: false)
         title = "快捷指令列表"
         isReleasedWhenClosed = false
-        minSize = NSSize(width: 400, height: 300)
+        minSize = NSSize(width: 450, height: 280)
         center()
-
+        backgroundColor = NSColor.windowBackgroundColor
         buildUI()
         loadShortcuts()
     }
 
     private func buildUI() {
-        let scroll = NSScrollView(frame: contentView!.bounds)
+        let toolbar = NSView(frame: NSRect(x: 0, y: contentView!.frame.height - 40, width: contentView!.frame.width, height: 40))
+        toolbar.autoresizingMask = [.width, .minYMargin]
+        contentView?.addSubview(toolbar)
+
+        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: contentView!.frame.width, height: contentView!.frame.height - 40))
         scroll.autoresizingMask = [.width, .height]
+        scroll.hasVerticalScroller = true
         contentView?.addSubview(scroll)
 
         tableView = NSTableView(frame: scroll.bounds)
         tableView.autoresizingMask = [.width]
+        tableView.gridStyleMask = .solidHorizontalGridLineMask
+        tableView.selectionHighlightStyle = .regular
+        tableView.focusRingType = .none
 
         let nameCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("name"))
         nameCol.title = "名称"
-        nameCol.minWidth = 150
-        nameCol.maxWidth = 200
+        nameCol.minWidth = 160; nameCol.maxWidth = 200
         tableView.addTableColumn(nameCol)
 
         let triggerCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("trigger"))
         triggerCol.title = "触发器"
-        triggerCol.minWidth = 150
-        triggerCol.maxWidth = 200
+        triggerCol.minWidth = 140; triggerCol.maxWidth = 180
         tableView.addTableColumn(triggerCol)
 
         let descCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("desc"))
@@ -46,20 +52,13 @@ class ShortcutListWindow: NSWindow {
 
         tableView.dataSource = self
         tableView.delegate = self
-
         scroll.documentView = tableView
-        scroll.hasVerticalScroller = true
 
-        // Add delete button at bottom
-        let toolbar = NSView(frame: NSRect(x: 0, y: 0, width: 600, height: 40))
-        toolbar.autoresizingMask = [.width]
-
-        let deleteBtn = NSButton(title: "删除选中", target: self, action: #selector(deleteSelected))
-        deleteBtn.frame = NSRect(x: 10, y: 5, width: 80, height: 30)
+        let deleteBtn = NSButton(title: "🗑 删除选中", target: self, action: #selector(deleteSelected))
+        deleteBtn.frame = NSRect(x: 15, y: 5, width: 90, height: 30)
         deleteBtn.bezelStyle = .rounded
+        deleteBtn.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         toolbar.addSubview(deleteBtn)
-
-        contentView?.addSubview(toolbar)
     }
 
     private func loadShortcuts() {
@@ -71,24 +70,28 @@ class ShortcutListWindow: NSWindow {
     @objc private func deleteSelected() {
         guard tableView.selectedRow >= 0 else { return }
         let shortcut = shortcuts[tableView.selectedRow]
-        let store = ConfigStore()
-        store.removeRule(id: shortcut.id)
-        if let sp = shortcut.scriptPath {
-            try? FileManager.default.removeItem(at: store.scriptsDir.appendingPathComponent(sp))
+
+        let alert = NSAlert()
+        alert.messageText = "删除快捷指令"
+        alert.informativeText = "确定要删除「\(shortcut.name)」吗？"
+        alert.addButton(withTitle: "删除")
+        alert.addButton(withTitle: "取消")
+        if alert.runModal() == .alertFirstButtonReturn {
+            let store = ConfigStore()
+            store.removeRule(id: shortcut.id)
+            Logger.shared.log(level: .info, message: "删除快捷指令: \(shortcut.name)")
+            loadShortcuts()
         }
-        Logger.shared.log(level: .info, message: "删除快捷指令: \(shortcut.name)")
-        loadShortcuts()
     }
 }
 
 extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
-    func numberOfRows(in tableView: NSTableView) -> Int {
-        shortcuts.count
-    }
+    func numberOfRows(in tableView: NSTableView) -> Int { shortcuts.count }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let shortcut = shortcuts[row]
         let cell = NSTextField(labelWithString: "")
+        cell.font = NSFont.systemFont(ofSize: 13)
         cell.stringValue = rowValue(shortcut, column: tableColumn?.identifier.rawValue ?? "")
         return cell
     }
@@ -97,21 +100,17 @@ extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
         switch column {
         case "name": return shortcut.name
         case "trigger": return triggerDescription(shortcut.trigger)
-        case "desc":
-            if let sp = shortcut.scriptPath {
-                return "(脚本: \(sp))"
-            }
-            return shortcut.actions.map { "\($0.name)(\($0.params))" }.joined(separator: ", ")
+        case "desc": return shortcut.scriptPath.map { "\($0.prefix(15)).js" } ?? shortcut.actions.map { $0.name }.joined(separator: ", ")
         default: return ""
         }
     }
 
     private func triggerDescription(_ trigger: RuleTrigger) -> String {
         switch trigger {
-        case .hotkey(let key): return "⌨️ \(key)"
+        case .hotkey(let key): return key
         case .wifi(let ssid): return "📶 \(ssid)"
-        case .display(let count): return "🖥 \(count) 屏"
-        case .time(let from, let to): return "⏰ \(from)-\(to)"
+        case .display(let count): return "\(count) 屏"
+        case .time(let from, let to): return "\(from) - \(to)"
         }
     }
 }

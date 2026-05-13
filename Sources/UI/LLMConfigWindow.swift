@@ -1,45 +1,50 @@
 import AppKit
 
-// MARK: - LLM Config Window
+// MARK: - Modern LLM Config Window
 
 class LLMConfigWindow: NSWindow {
     private var providerPopup: NSPopUpButton!
     private var modelPopup: NSPopUpButton!
-    private var apiKeyField: NSSecureTextField!
+    private var apiKeyField: NSTextField!
+    private var apiKeyToggleBtn: NSButton!
     private var baseUrlField: NSTextField!
     private var statusLabel: NSTextField!
     private var testBtn: NSButton!
     private var saveBtn: NSButton!
+    private var isKeyVisible = false
 
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 450, height: 320),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 480, height: 340),
                    styleMask: [.titled, .closable],
                    backing: .buffered, defer: false)
         title = "LLM 配置"
         isReleasedWhenClosed = false
-        minSize = NSSize(width: 450, height: 320)
-        maxSize = NSSize(width: 450, height: 320)
+        minSize = NSSize(width: 480, height: 340)
+        maxSize = NSSize(width: 480, height: 340)
         center()
+        backgroundColor = NSColor.windowBackgroundColor
 
         buildUI()
         loadConfig()
     }
 
     private func buildUI() {
-        let y = contentView!.frame.height
-        let leftX: CGFloat = 20, rightX: CGFloat = 160, width: CGFloat = 260
-        var currentY = y - 40
+        let w = contentView!.frame.width
+        let leftX: CGFloat = 30, rightX: CGFloat = 110, width: CGFloat = w - rightX - 30
+        var currentY: CGFloat = w > 0 ? 290 : 290
 
         func addLabel(text: String, atY: CGFloat) {
             let label = NSTextField(labelWithString: text)
-            label.frame = NSRect(x: leftX, y: atY, width: rightX - leftX - 10, height: 24)
+            label.frame = NSRect(x: leftX, y: atY, width: rightX - leftX - 10, height: 22)
             label.alignment = .right
+            label.textColor = NSColor.secondaryLabelColor
+            label.font = NSFont.systemFont(ofSize: 13)
             contentView?.addSubview(label)
         }
 
         // Provider
-        addLabel(text: "提供商:", atY: currentY)
-        providerPopup = NSPopUpButton(frame: NSRect(x: rightX, y: currentY - 3, width: width, height: 30))
+        addLabel(text: "提供商", atY: currentY)
+        providerPopup = modernPopup(frame: NSRect(x: rightX, y: currentY - 2, width: width, height: 28))
         for p in LLMProvider.all { providerPopup.addItem(withTitle: p.label) }
         providerPopup.target = self
         providerPopup.action = #selector(providerChanged)
@@ -47,44 +52,71 @@ class LLMConfigWindow: NSWindow {
         currentY -= 40
 
         // Model
-        addLabel(text: "模型:", atY: currentY)
-        modelPopup = NSPopUpButton(frame: NSRect(x: rightX, y: currentY - 3, width: width, height: 30))
+        addLabel(text: "模型", atY: currentY)
+        modelPopup = modernPopup(frame: NSRect(x: rightX, y: currentY - 2, width: width, height: 28))
         contentView?.addSubview(modelPopup)
         currentY -= 40
 
-        // API Key
-        addLabel(text: "API Key:", atY: currentY)
-        apiKeyField = NSSecureTextField(frame: NSRect(x: rightX, y: currentY - 3, width: width, height: 30))
+        // API Key with toggle
+        addLabel(text: "API Key", atY: currentY)
+        apiKeyField = NSTextField(frame: NSRect(x: rightX, y: currentY - 2, width: width - 35, height: 28))
+        apiKeyField.isBordered = true
+        apiKeyField.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
         apiKeyField.placeholderString = "sk-..."
+        apiKeyField.backgroundColor = NSColor.controlBackgroundColor
         contentView?.addSubview(apiKeyField)
+
+        apiKeyToggleBtn = NSButton(frame: NSRect(x: rightX + width - 28, y: currentY - 2, width: 28, height: 28))
+        apiKeyToggleBtn.bezelStyle = .rounded
+        apiKeyToggleBtn.isBordered = false
+        apiKeyToggleBtn.image = NSImage(systemSymbolName: "eye.slash", accessibilityDescription: "toggle")
+        apiKeyToggleBtn.target = self
+        apiKeyToggleBtn.action = #selector(toggleKeyVisibility)
+        contentView?.addSubview(apiKeyToggleBtn)
         currentY -= 40
 
         // Base URL
-        addLabel(text: "Base URL:", atY: currentY)
-        baseUrlField = NSTextField(frame: NSRect(x: rightX, y: currentY - 3, width: width, height: 30))
+        addLabel(text: "Base URL", atY: currentY)
+        baseUrlField = NSTextField(frame: NSRect(x: rightX, y: currentY - 2, width: width, height: 28))
+        baseUrlField.isBordered = true
+        baseUrlField.bezelStyle = .roundedBezel
+        baseUrlField.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
         baseUrlField.placeholderString = "留空使用默认"
+        baseUrlField.backgroundColor = NSColor.controlBackgroundColor
         contentView?.addSubview(baseUrlField)
-        currentY -= 50
+        currentY -= 55
 
         // Status
         statusLabel = NSTextField(labelWithString: "")
-        statusLabel.frame = NSRect(x: leftX, y: currentY, width: width + rightX, height: 24)
+        statusLabel.frame = NSRect(x: leftX, y: currentY, width: width + rightX - 10, height: 22)
         statusLabel.textColor = .systemBlue
+        statusLabel.font = NSFont.systemFont(ofSize: 12)
         contentView?.addSubview(statusLabel)
-        currentY -= 35
+        currentY -= 30
 
         // Test button
-        testBtn = NSButton(title: "测试连接", target: self, action: #selector(testConnection))
-        testBtn.frame = NSRect(x: leftX, y: currentY, width: 80, height: 30)
-        testBtn.bezelStyle = .rounded
+        testBtn = modernButton(title: "测试连接", action: #selector(testConnection), x: leftX, width: 90)
+        testBtn.frame = NSRect(x: leftX, y: currentY, width: 90, height: 30)
         contentView?.addSubview(testBtn)
 
         // Save button
-        saveBtn = NSButton(title: "保存", target: self, action: #selector(saveConfig))
-        saveBtn.frame = NSRect(x: leftX + 100, y: currentY, width: 60, height: 30)
-        saveBtn.bezelStyle = .rounded
+        saveBtn = modernButton(title: "保存", action: #selector(saveConfig), x: leftX + 105, width: 60)
+        saveBtn.frame = NSRect(x: leftX + 105, y: currentY, width: 60, height: 30)
         saveBtn.keyEquivalent = "\r"
         contentView?.addSubview(saveBtn)
+    }
+
+    private func modernPopup(frame: NSRect) -> NSPopUpButton {
+        let popup = NSPopUpButton(frame: frame)
+        popup.font = NSFont.systemFont(ofSize: 13)
+        return popup
+    }
+
+    private func modernButton(title: String, action: Selector, x: CGFloat, width: CGFloat) -> NSButton {
+        let btn = NSButton(title: title, target: self, action: action)
+        btn.bezelStyle = .rounded
+        btn.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        return btn
     }
 
     private func loadConfig() {
@@ -92,20 +124,20 @@ class LLMConfigWindow: NSWindow {
         let config = prefs.loadLLMConfig()
         let provider = LLMProvider.byId(config.provider)
 
-        // Set provider
         if let idx = LLMProvider.all.firstIndex(where: { $0.id == config.provider }) {
             providerPopup.selectItem(at: idx)
         }
 
-        // Set models
         updateModelPopup(models: provider.availableModels, defaultModel: config.model.isEmpty ? provider.defaultModel : config.model)
 
-        // Set API key
         if !config.apiKey.isEmpty {
             apiKeyField.stringValue = config.apiKey
+            isKeyVisible = true
+        } else {
+            isKeyVisible = false
         }
+        updateKeyVisibility()
 
-        // Set base URL
         if !config.baseUrl.isEmpty {
             baseUrlField.stringValue = config.baseUrl
         }
@@ -125,6 +157,24 @@ class LLMConfigWindow: NSWindow {
         updateModelPopup(models: provider.availableModels, defaultModel: provider.defaultModel)
         if baseUrlField.stringValue.isEmpty {
             baseUrlField.placeholderString = provider.baseUrl
+        }
+    }
+
+    @objc private func toggleKeyVisibility() {
+        isKeyVisible.toggle()
+        updateKeyVisibility()
+    }
+
+    private func updateKeyVisibility() {
+        if isKeyVisible {
+            apiKeyField.isBordered = true
+            apiKeyToggleBtn.image = NSImage(systemSymbolName: "eye", accessibilityDescription: "hide")
+        } else {
+            apiKeyField.isBordered = true
+            apiKeyToggleBtn.image = NSImage(systemSymbolName: "eye.slash", accessibilityDescription: "show")
+            if !apiKeyField.stringValue.isEmpty {
+                apiKeyField.placeholderString = String(repeating: "•", count: min(apiKeyField.stringValue.count, 20))
+            }
         }
     }
 
