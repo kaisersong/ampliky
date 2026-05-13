@@ -284,7 +284,7 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTextFiel
     }
 
     @objc private func openPermissionSettings() {
-        PermissionChecker.requestInputMonitoring()
+        PermissionChecker.registerForInputMonitoring()
         PermissionChecker.requestAccessibilityPermission()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
