@@ -4,15 +4,25 @@ import Carbon
 enum PermissionChecker {
 
     static func hasInputMonitoringPermission() -> Bool {
-        guard let sym = dlsym(dlopen(nil, RTLD_NOW), "CGPreflightListenEventAccess") else { return true }
-        typealias Fn = @convention(c) () -> Bool
-        return unsafeBitCast(sym, to: Fn.self)()
+        // AXIsProcessTrusted is the reliable way to check if we have accessibility
+        // For input monitoring, we try to create an event tap - if it fails, we don't have permission
+        let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
+        let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap,
+                                     options: .defaultTap, eventsOfInterest: mask,
+                                     callback: { _, _, _, _ in nil }, userInfo: nil)
+        if tap != nil {
+            CFMachPortInvalidate(tap)
+            return true
+        }
+        return false
     }
 
     static func requestInputMonitoring() {
-        guard let sym = dlsym(dlopen(nil, RTLD_NOW), "CGRequestListenEventAccess") else { return }
-        typealias Fn = @convention(c) () -> Void
-        unsafeBitCast(sym, to: Fn.self)()
+        // Trigger the system prompt by creating a disabled event tap
+        let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
+        _ = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap,
+                               options: .defaultTap, eventsOfInterest: mask,
+                               callback: { _, _, _, _ in nil }, userInfo: nil)
     }
 
     static func hasAccessibilityPermission() -> Bool {
@@ -41,10 +51,8 @@ enum PermissionChecker {
         alert.addButton(withTitle: "稍后")
 
         if alert.runModal() == .alertFirstButtonReturn {
-            // First request the one that can trigger system prompt
             if needsInput { requestInputMonitoring() }
             if needsAccess { requestAccessibilityPermission() }
-            // Then open system settings as fallback
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
             }

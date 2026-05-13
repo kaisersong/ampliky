@@ -9,7 +9,6 @@ class SettingsWindowController: NSWindowController {
     private var tabContents: [NSView] = []
     private var currentTab = 0
 
-    // LLM
     private var providerPopup: NSPopUpButton!
     private var modelPopup: NSPopUpButton!
     private var apiKeyField: NSTextField!
@@ -19,7 +18,6 @@ class SettingsWindowController: NSWindowController {
     private var testBtn: NSButton!
     private var isKeyVisible = false
 
-    // General
     private var showMenubarCheckbox: NSButton!
     private var launchAtLoginCheckbox: NSButton!
     private var autoUpdateCheckbox: NSButton!
@@ -29,23 +27,31 @@ class SettingsWindowController: NSWindowController {
     private var permFixBtn: NSButton!
 
     init() {
-        let win = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 440),
-                           styleMask: [.titled, .closable],
-                           backing: .buffered, defer: false)
-        win.title = "设置"
-        win.isReleasedWhenClosed = false
-        win.minSize = NSSize(width: 540, height: 440)
-        win.maxSize = NSSize(width: 540, height: 440)
-        win.center()
-        win.backgroundColor = NSColor.windowBackgroundColor
-        super.init(window: win)
+        // Use NSPanel instead of NSWindow - panels handle focus correctly in LSUIElement apps
+        let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 540, height: 440),
+                            styleMask: [.titled, .closable],
+                            backing: .buffered, defer: false)
+        panel.title = "设置"
+        panel.isReleasedWhenClosed = false
+        panel.minSize = NSSize(width: 540, height: 440)
+        panel.maxSize = NSSize(width: 540, height: 440)
+        panel.center()
+        panel.backgroundColor = NSColor.windowBackgroundColor
+        panel.level = .floating
+        panel.collectionBehavior = [.transient, .ignoresCycle]
+        panel.becomesKeyOnlyIfNeeded = true
+
+        super.init(window: panel)
 
         buildUI()
-        loadSettings()
 
-        window?.makeKeyAndOrderFront(nil)
+        // Activate app synchronously before showing window
         NSApp.activate(ignoringOtherApps: true)
-        window?.makeFirstResponder(providerPopup)
+        panel.makeKeyAndOrderFront(nil)
+
+        // Load settings after window is key
+        loadSettings()
+        panel.makeFirstResponder(providerPopup)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -53,7 +59,6 @@ class SettingsWindowController: NSWindowController {
     private func buildUI() {
         containerView = NSView(frame: NSRect(x: 0, y: 0, width: 540, height: 440))
 
-        // Tab bar
         tabBar = NSView(frame: NSRect(x: 0, y: 390, width: 540, height: 50))
         tabBar.wantsLayer = true
         tabBar.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
@@ -71,9 +76,7 @@ class SettingsWindowController: NSWindowController {
             tabButtons.append(btn)
         }
 
-        // LLM content
         tabContents.append(buildLLMView())
-        // General content
         tabContents.append(buildGeneralView())
 
         containerView.addSubview(tabContents[0])
@@ -89,9 +92,8 @@ class SettingsWindowController: NSWindowController {
         currentTab = sender.tag
         tabContents[currentTab].isHidden = false
         tabButtons[currentTab].state = .on
+        window?.makeFirstResponder(currentTab == 0 ? providerPopup : showMenubarCheckbox)
     }
-
-    // MARK: - LLM View
 
     private func buildLLMView() -> NSView {
         let view = NSView(frame: NSRect(x: 0, y: 0, width: 540, height: 390))
@@ -153,8 +155,6 @@ class SettingsWindowController: NSWindowController {
         return view
     }
 
-    // MARK: - General View
-
     private func buildGeneralView() -> NSView {
         let view = NSView(frame: NSRect(x: 0, y: 0, width: 540, height: 390))
         let padding: CGFloat = 30
@@ -213,8 +213,6 @@ class SettingsWindowController: NSWindowController {
 
         return view
     }
-
-    // MARK: - Actions
 
     @objc private func providerChanged() {
         let idx = providerPopup.indexOfSelectedItem
