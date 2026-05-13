@@ -25,8 +25,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         ruleEngine = RuleEngine(rules: configStore.loadRules())
 
+        // Check and prompt for permissions
+        PermissionChecker.checkAndPrompt()
+
         hotkeyTrigger = HotkeyTrigger()
-        registerHotkeys(rules: rules)
+        registerHotkeys(rules: configStore.loadRules())
         hotkeyTrigger.start()
 
         socketServer = SocketServer()

@@ -31,6 +31,7 @@
 		A82CD09C044B7BF8FA2679E4 /* SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3E4C7985C03877F95D741D /* SystemPrompt.swift */; };
 		A84610B2201EE9FC59EBA0F2 /* ActionSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1ABEDA79D2F047F1E0E429B /* ActionSchemaTests.swift */; };
 		ABE82058CDCFEC327D4CE661 /* NLTInputWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */; };
+		B7865DD0320F72C0CF3DBFFF /* PermissionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0D321EBD739251C4431B90 /* PermissionChecker.swift */; };
 		BBA63C5BECA8615A13BF6FE5 /* LLMConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509544993147C574AB054FDF /* LLMConfigWindow.swift */; };
 		C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA3E5FF81FC344130585207 /* ScriptStore.swift */; };
 		C777810049CB03118C99CE2C /* AppAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D530725314CF2D27DAF15 /* AppAction.swift */; };
@@ -86,6 +87,7 @@
 		E64EAB72655994EB65EFB757 /* RuleEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleEngineTests.swift; sourceTree = "<group>"; };
 		E9CD8A9DEB7A6DBA447A8534 /* SystemPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPromptTests.swift; sourceTree = "<group>"; };
 		EB892209D8FB423E34360CC2 /* ActionSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSchema.swift; sourceTree = "<group>"; };
+		FF0D321EBD739251C4431B90 /* PermissionChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -228,6 +230,7 @@
 				EB892209D8FB423E34360CC2 /* ActionSchema.swift */,
 				40CE1B5D589E31A41CBAC2AA /* ConfigStore.swift */,
 				22013EDAC4243EF2FA0D3A9D /* Logger.swift */,
+				FF0D321EBD739251C4431B90 /* PermissionChecker.swift */,
 				9D135BFFC46F2BC71F296360 /* RuleEngine.swift */,
 				DBA3E5FF81FC344130585207 /* ScriptStore.swift */,
 			);
@@ -342,6 +345,7 @@
 				2A0AFB0BB917C6468706A3E6 /* Logger.swift in Sources */,
 				51FCB3B4B71122EA9D7FBE51 /* MenuBarController.swift in Sources */,
 				ABE82058CDCFEC327D4CE661 /* NLTInputWindow.swift in Sources */,
+				B7865DD0320F72C0CF3DBFFF /* PermissionChecker.swift in Sources */,
 				DF4C18E1D88B4DAA01E68CA9 /* RuleEngine.swift in Sources */,
 				C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */,
 				4E8FA2D79DD711E3530D0F32 /* SelfHealer.swift in Sources */,
