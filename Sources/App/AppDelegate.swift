@@ -67,6 +67,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.handleRPC(request) ?? SocketProtocol.errorResponse(id: request.id, code: -32603, message: "Internal error")
         }
         try? socketServer.start()
+
+        // Listen for rule changes from UI
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(rulesChanged),
+            name: NSNotification.Name("AmplikyRulesChanged"), object: nil
+        )
+    }
+
+    @objc private func rulesChanged() {
+        print("[Ampliky] Rules changed, reloading...")
+        Logger.shared.log(level: .info, message: "规则变更，重新加载")
+
+        // Stop existing triggers
+        hotkeyTrigger.stop()
+        gestureTrigger.stop()
+
+        // Reload rules and re-register
+        let rules = configStore.loadRules()
+        ruleEngine = RuleEngine(rules: rules)
+        registerHotkeys(rules: rules)
+        registerGestures(rules: rules)
+
+        // Restart triggers
+        hotkeyTrigger.start()
+        gestureTrigger.start()
+
+        Logger.shared.log(level: .info, message: "规则重新加载完成 (\(rules.count) 条)")
     }
 
     private func registerHotkeys(rules: [Rule]) {
@@ -198,6 +225,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return SocketProtocol.successResponse(id: request.id, result: [
                 "screens": NSScreen.screens.count,
             ])
+        case "exec":
+            // Execute action by name (convenience method for CLI)
+            guard let name = request.params["name"] as? String else {
+                return SocketProtocol.errorResponse(id: request.id, code: -32602, message: "missing 'name' field")
+            }
+            let params = (request.params["params"] as? [String: String]) ?? [:]
+            switch name {
+            case "teleportCursor":
+                if let to = params["to"] {
+                    CursorAction.teleport(to: to)
+                    return SocketProtocol.successResponse(id: request.id, result: ["success": true, "action": name])
+                }
+                return SocketProtocol.errorResponse(id: request.id, code: -32602, message: "missing 'to' param")
+            case "screenCount":
+                return SocketProtocol.successResponse(id: request.id, result: ["success": true, "count": NSScreen.screens.count])
+            case "cursorPosition":
+                let loc = NSEvent.mouseLocation
+                return SocketProtocol.successResponse(id: request.id, result: ["success": true, "x": loc.x, "y": loc.y])
+            default:
+                return SocketProtocol.errorResponse(id: request.id, code: -32601, message: "Unknown action: \(name)")
+            }
         default:
             return SocketProtocol.errorResponse(id: request.id, code: -32601, message: "Method not found: \(request.method)")
         }

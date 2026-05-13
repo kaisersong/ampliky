@@ -14,9 +14,21 @@ struct AmplikyCLI {
 
         switch subcommand {
         case "run":
+            let scriptCode = args.dropFirst().joined(separator: " ")
+            // Wrap script as JSON string
+            let encodedScript = scriptCode.replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "\"", with: "\\\"")
+            let request = """
+            {"jsonrpc":"2.0","method":"run","params":{"script":"\(encodedScript)"},"id":1}
+            """
+            let response = sendToSocket(path: socketPath, message: request)
+            print(response)
+
+        case "exec":
+            // Execute action by name (for convenience)
             let jsonString = args.dropFirst().joined(separator: " ")
             let request = """
-            {"jsonrpc":"2.0","method":"run","params":\(jsonString),"id":1}
+            {"jsonrpc":"2.0","method":"exec","params":\(jsonString),"id":1}
             """
             let response = sendToSocket(path: socketPath, message: request)
             print(response)
@@ -95,10 +107,16 @@ struct AmplikyCLI {
         ampliky - AI-native macOS automation engine
 
         Usage:
-          ampliky run '<action_json>'     Execute an action
-          ampliky rule list               List all rules
-          ampliky rule remove <id>        Remove a rule
-          ampliky context                 Show current context (screens)
+          ampliky run '<script_js>'      Execute JavaScript directly
+          ampliky exec '<action_json>'   Execute action by name
+          ampliky rule list              List all rules
+          ampliky rule remove <id>       Remove a rule
+          ampliky context                Show current context (screens)
+
+        Examples:
+          ampliky run 'Ampliky.cursor.warpNext()'
+          ampliky exec '{"name":"teleportCursor","params":{"to":"next_screen"}}'
+          ampliky context
         """)
     }
 }

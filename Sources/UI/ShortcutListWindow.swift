@@ -98,6 +98,7 @@ class ShortcutListWindow: NSWindow, ShortcutListWindowDelegate {
             let store = ConfigStore()
             store.removeRule(id: shortcut.id)
             Logger.shared.log(level: .info, message: "删除快捷指令: \(shortcut.name)")
+            NotificationCenter.default.post(name: NSNotification.Name("AmplikyRulesChanged"), object: nil)
             loadShortcuts()
         }
     }
@@ -153,6 +154,7 @@ class ShortcutListWindow: NSWindow, ShortcutListWindowDelegate {
         store.addRule(newRule)
 
         Logger.shared.log(level: .info, message: "快捷指令 \(newRule.enabled ? "启用" : "禁用"): \(shortcut.name)")
+        NotificationCenter.default.post(name: NSNotification.Name("AmplikyRulesChanged"), object: nil)
         loadShortcuts()
     }
 }

@@ -218,6 +218,9 @@ class EditShortcutWindow: NSWindow {
 
         Logger.shared.log(level: .info, message: "更新快捷指令: \(name)")
 
+        // Broadcast rule change so AppDelegate can reload
+        NotificationCenter.default.post(name: NSNotification.Name("AmplikyRulesChanged"), object: nil)
+
         // Notify parent to refresh
         parentDelegate?.shortcutListWindowDidUpdate()
 
