@@ -149,4 +149,33 @@ class ConfigStore {
         let data = try? JSONSerialization.data(withJSONObject: prefs)
         try? data?.write(to: prefsFile, options: .atomic)
     }
+
+    // MARK: - LLM Config
+
+    func loadLLMConfig() -> LLMConfig {
+        guard let data = try? Data(contentsOf: prefsFile),
+              let prefs = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let llm = prefs["llm"] as? [String: Any] else {
+            return LLMConfig()
+        }
+        var config = LLMConfig()
+        if let p = llm["provider"] as? String { config.provider = p }
+        if let m = llm["model"] as? String { config.model = m }
+        if let k = llm["apiKey"] as? String { config.apiKey = k }
+        if let b = llm["baseUrl"] as? String { config.baseUrl = b }
+        return config
+    }
+
+    func saveLLMConfig(_ config: LLMConfig) {
+        var prefs: [String: Any] = (try? Data(contentsOf: prefsFile)).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] } ?? [:]
+        prefs["showMenubar"] = shouldShowMenubar()
+        prefs["llm"] = [
+            "provider": config.provider,
+            "model": config.model,
+            "apiKey": config.apiKey,
+            "baseUrl": config.baseUrl
+        ]
+        let data = try? JSONSerialization.data(withJSONObject: prefs)
+        try? data?.write(to: prefsFile, options: .atomic)
+    }
 }

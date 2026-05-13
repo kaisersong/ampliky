@@ -97,7 +97,15 @@ class JSCRunner {
         }
 
         if let result = result, !result.isUndefined {
-            return .ok(result.toString() ?? "", durationMs: duration)
+            // If the JS value is an object, JSON.stringify it for proper output
+            let output: String
+            if result.isObject {
+                let stringifyFn = context.objectForKeyedSubscript("JSON")?.objectForKeyedSubscript("stringify")
+                output = stringifyFn?.call(withArguments: [result])?.toString() ?? result.toString() ?? ""
+            } else {
+                output = result.toString() ?? ""
+            }
+            return .ok(output, durationMs: duration)
         }
 
         return .ok("undefined", durationMs: duration)
