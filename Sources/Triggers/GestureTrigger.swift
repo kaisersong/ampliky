@@ -1,11 +1,13 @@
 import AppKit
 import Carbon
 
-// MARK: - Gesture Trigger using CGEvent tap with finger count detection
+// MARK: - Gesture Trigger using NSGestureRecognizer for multi-finger detection
 
 class GestureTrigger {
-    private var eventTap: CFMachPort?
     private var callbacks: [String: () -> Void] = [:]
+    private var eventTap: CFMachPort?
+    private var gestureView: NSView?
+    private var gestureWindow: NSWindow?
 
     static let threeFingerTap = "threeFingerTap"
     static let threeFingerSwipeUp = "threeFingerSwipeUp"
@@ -13,25 +15,46 @@ class GestureTrigger {
     static let threeFingerSwipeLeft = "threeFingerSwipeLeft"
     static let threeFingerSwipeRight = "threeFingerSwipeRight"
 
-    // Track state for three-finger detection
-    private var fingerDownCount: Int = 0
+    // Track state for three-finger detection via CGEvent fallback
+    private var isThreeFingerPending: Bool = false
     private var fingerDownTime: TimeInterval = 0
-    private var isThreeFingerTapPending = false
 
     func register(gesture: String, callback: @escaping () -> Void) {
         callbacks[gesture] = callback
     }
 
     func start() {
-        // Listen to mouse down/up and scroll events
-        let mask: CGEventMask =
-            (1 << CGEventType.leftMouseDown.rawValue) |
-            (1 << CGEventType.leftMouseUp.rawValue) |
-            (1 << CGEventType.otherMouseDown.rawValue) |
-            (1 << CGEventType.otherMouseUp.rawValue) |
-            (1 << CGEventType.rightMouseDown.rawValue) |
-            (1 << CGEventType.rightMouseUp.rawValue) |
-            (1 << CGEventType.scrollWheel.rawValue)
+        // Create a hidden window to capture gesture recognizer events
+        // NSGestureRecognizer requires a view in a window to work
+        let window = NSWindow(contentRect: NSRect(x: -1000, y: -1000, width: 100, height: 100),
+                              styleMask: [.borderless],
+                              backing: .buffered, defer: false)
+        window.level = .screenSaver
+        window.ignoresMouseEvents = false
+        window.hasShadow = false
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.orderFrontRegardless() // Keep it alive
+
+        // Create a view with gesture recognizers
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+        window.contentView = view
+
+        // Three-finger press gesture
+        let pressGesture = NSPressGestureRecognizer(target: self, action: #selector(threeFingerPressDetected(_:)))
+        pressGesture.minimumPressDuration = 0
+        pressGesture.numberOfTouchesRequired = 3
+        view.addGestureRecognizer(pressGesture)
+
+        // Pan gesture for swipe detection (three fingers)
+        let panGesture = NSPanGestureRecognizer(target: self, action: #selector(panDetected(_:)))
+        view.addGestureRecognizer(panGesture)
+
+        gestureView = view
+        gestureWindow = window
+
+        // Also use CGEvent tap for swipe detection fallback
+        let mask: CGEventMask = (1 << CGEventType.scrollWheel.rawValue)
 
         guard let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
@@ -41,7 +64,7 @@ class GestureTrigger {
             callback: { _, _, event, refcon -> Unmanaged<CGEvent>? in
                 guard let refcon = refcon else { return Unmanaged.passRetained(event) }
                 let `self` = Unmanaged<GestureTrigger>.fromOpaque(refcon).takeUnretainedValue()
-                self.handleEvent(event)
+                self.handleScrollEvent(event)
                 return Unmanaged.passUnretained(event)
             },
             userInfo: Unmanaged.passUnretained(self).toOpaque()
@@ -56,21 +79,75 @@ class GestureTrigger {
         CGEvent.tapEnable(tap: tap, enable: true)
 
         #if DEBUG
-        print("[Ampliky] Gesture trigger started - listening for trackpad events")
+        print("[Ampliky] Gesture trigger started - NSPressGestureRecognizer for 3-finger tap + CGEvent for swipe")
         #endif
     }
 
     func stop() {
+        gestureView = nil
+        gestureWindow?.orderOut(nil)
+        gestureWindow = nil
+
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
             eventTap = nil
         }
     }
 
-    private func handleEvent(_ event: CGEvent) {
-        let type = event.type
+    @objc private func threeFingerPressDetected(_ gesture: NSPressGestureRecognizer) {
+        if gesture.state == .recognized || gesture.state == .ended {
+            #if DEBUG
+            print("[Ampliky] Three-finger tap detected via NSPressGestureRecognizer!")
+            #endif
+            fireThreeFingerTap()
+        }
+    }
 
-        // Auto-restart on disabled
+    @objc private func panDetected(_ gesture: NSPanGestureRecognizer) {
+        if gesture.state == .ended {
+            let translation = gesture.translation(in: gesture.view)
+            #if DEBUG
+            print("[Ampliky] Pan gesture ended: x=\(translation.x), y=\(translation.y)")
+            #endif
+
+            if abs(translation.y) > abs(translation.x) {
+                if translation.y < -20 {
+                    if let cb = callbacks[GestureTrigger.threeFingerSwipeUp] {
+                        #if DEBUG
+                        print("[Ampliky] Three-finger swipe up via gesture")
+                        #endif
+                        cb()
+                    }
+                } else if translation.y > 20 {
+                    if let cb = callbacks[GestureTrigger.threeFingerSwipeDown] {
+                        #if DEBUG
+                        print("[Ampliky] Three-finger swipe down via gesture")
+                        #endif
+                        cb()
+                    }
+                }
+            } else {
+                if translation.x > 20 {
+                    if let cb = callbacks[GestureTrigger.threeFingerSwipeRight] {
+                        #if DEBUG
+                        print("[Ampliky] Three-finger swipe right via gesture")
+                        #endif
+                        cb()
+                    }
+                } else if translation.x < -20 {
+                    if let cb = callbacks[GestureTrigger.threeFingerSwipeLeft] {
+                        #if DEBUG
+                        print("[Ampliky] Three-finger swipe left via gesture")
+                        #endif
+                        cb()
+                    }
+                }
+            }
+        }
+    }
+
+    private func handleScrollEvent(_ event: CGEvent) {
+        let type = event.type
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap = eventTap {
                 CGEvent.tapEnable(tap: tap, enable: true)
@@ -78,104 +155,43 @@ class GestureTrigger {
             return
         }
 
-        // Get event flags - trackpad multi-finger events have specific flag values
-        let flags = event.flags
-        let flagsValue = flags.rawValue
-
-        #if DEBUG
-        if type == .otherMouseDown || type == .otherMouseUp || type == .leftMouseDown || type == .leftMouseUp {
-            print("[Ampliky] Mouse event: type=\(type.rawValue), flags=\(flagsValue)")
-        }
-        #endif
-
-        // Detect three-finger tap via event flags
-        // Trackpad three-finger click has flags value 0x1000000 (16777216)
-        // Two-finger click has flags value 0x2000000 (33554432)
-        // Single-finger click has flags value 0x100 (256)
-        if type == .otherMouseDown || type == .leftMouseDown {
-            if flagsValue == 0x1000000 || flagsValue == 0x100 {
-                // Check if this is a three-finger event
-                // Three-finger tap on trackpad sends a special event
-                let mouseButton = event.getIntegerValueField(.mouseEventButtonNumber)
-
-                #if DEBUG
-                print("[Ampliky] Mouse down: button=\(mouseButton), flags=\(flagsValue)")
-                #endif
-
-                // Three-finger tap: button 0 with special flags
-                if mouseButton == 0 && (flagsValue == 0x1000000 || isThreeFingerEvent(flags: flags)) {
-                    isThreeFingerTapPending = true
-                    fingerDownTime = CACurrentMediaTime()
-                    #if DEBUG
-                    print("[Ampliky] Three-finger tap pending...")
-                    #endif
-                }
-            }
-        }
-
-        // Check for three-finger tap release
-        if type == .otherMouseUp || type == .leftMouseUp {
-            if isThreeFingerTapPending {
-                let duration = CACurrentMediaTime() - fingerDownTime
-                if duration < 0.5 { // Short tap, not a drag
-                    if let cb = callbacks[GestureTrigger.threeFingerTap] {
-                        #if DEBUG
-                        print("[Ampliky] Three-finger tap detected! duration=\(duration)")
-                        #endif
-                        cb()
-                    }
-                }
-                isThreeFingerTapPending = false
-            }
-        }
-
-        // Detect three-finger swipe via scroll events
         if type == .scrollWheel {
             let scrollX = event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1)
             let scrollY = event.getDoubleValueField(.scrollWheelEventPointDeltaAxis2)
 
-            // Check if this is a trackpad swipe (not mouse wheel)
-            // Trackpad swipes have continuous scroll phase
-            let scrollPhase = event.getIntegerValueField(.scrollWheelEventScrollPhase)
-
-            #if DEBUG
-            if abs(scrollX) > 1 || abs(scrollY) > 1 {
-                print("[Ampliky] Scroll: x=\(scrollX), y=\(scrollY), phase=\(scrollPhase)")
-            }
-            #endif
-
-            // Only process significant scrolls that look like finger swipes
             if abs(scrollX) > 10 || abs(scrollY) > 10 {
+                #if DEBUG
+                print("[Ampliky] Scroll event: x=\(scrollX), y=\(scrollY)")
+                #endif
+
                 if abs(scrollY) > abs(scrollX) {
-                    // Vertical swipe
                     if scrollY > 0 {
                         if let cb = callbacks[GestureTrigger.threeFingerSwipeUp] {
                             #if DEBUG
-                            print("[Ampliky] Three-finger swipe up detected!")
+                            print("[Ampliky] Three-finger swipe up via scroll")
                             #endif
                             cb()
                         }
                     } else {
                         if let cb = callbacks[GestureTrigger.threeFingerSwipeDown] {
                             #if DEBUG
-                            print("[Ampliky] Three-finger swipe down detected!")
+                            print("[Ampliky] Three-finger swipe down via scroll")
                             #endif
                             cb()
                         }
                     }
                 } else {
-                    // Horizontal swipe
                     if scrollX > 0 {
                         if let cb = callbacks[GestureTrigger.threeFingerSwipeRight] {
                             #if DEBUG
-                            print("[Ampliky] Three-finger swipe right detected!")
+                            print("[Ampliky] Three-finger swipe right via scroll")
                             #endif
                             cb()
                         }
                     } else {
                         if let cb = callbacks[GestureTrigger.threeFingerSwipeLeft] {
                             #if DEBUG
-                            print("[Ampliky] Three-finger swipe left detected!")
+                            print("[Ampliky] Three-finger swipe left via scroll")
                             #endif
                             cb()
                         }
@@ -185,11 +201,12 @@ class GestureTrigger {
         }
     }
 
-    // Check if the event flags indicate a multi-finger trackpad event
-    private func isThreeFingerEvent(flags: CGEventFlags) -> Bool {
-        let flagsValue = flags.rawValue
-        // Trackpad three-finger click has specific flag patterns
-        // This is heuristic-based and may not work on all macOS versions
-        return flagsValue == 0x1000000 || flagsValue == 0x4000000
+    private func fireThreeFingerTap() {
+        if let cb = callbacks[GestureTrigger.threeFingerTap] {
+            #if DEBUG
+            print("[Ampliky] Firing three-finger tap callback")
+            #endif
+            cb()
+        }
     }
 }

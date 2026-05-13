@@ -32,9 +32,18 @@ class ScriptStore {
         try? FileManager.default.removeItem(at: url)
     }
 
-    func updateScript(filename: String, content: String) {
+    func updateScript(filename: String, content: String) -> String {
         let url = scriptsDir.appendingPathComponent(filename)
+        let fileManager = FileManager.default
+        // Ensure directory exists
+        try? fileManager.createDirectory(at: scriptsDir, withIntermediateDirectories: true)
+        // If file doesn't exist, create it
+        if !fileManager.fileExists(atPath: url.path) {
+            try? content.write(to: url, atomically: true, encoding: .utf8)
+            return filename
+        }
         try? content.write(to: url, atomically: true, encoding: .utf8)
+        return filename
     }
 
     func listScripts() -> [String] {

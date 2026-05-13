@@ -180,15 +180,23 @@ class EditShortcutWindow: NSWindow {
             trigger = .gesture(fingers: fingers, action: action)
         }
 
-        // Save script
+        // Save script - always create new file if old one is missing
         let scriptContent = scriptView.string
         let scriptStore = ScriptStore()
         let filename: String
 
         if let oldPath = shortcut.scriptPath {
-            // Update existing script file
-            scriptStore.updateScript(filename: oldPath, content: scriptContent)
-            filename = oldPath
+            // Check if old file exists
+            let oldFile = ConfigStore().scriptsDir.appendingPathComponent(oldPath)
+            if FileManager.default.fileExists(atPath: oldFile.path) {
+                // Update existing script file
+                scriptStore.updateScript(filename: oldPath, content: scriptContent)
+                filename = oldPath
+            } else {
+                // Old file missing, create new one
+                filename = scriptStore.saveScript(content: scriptContent, name: name)
+                Logger.shared.log(level: .info, message: "脚本文件丢失，已创建新文件: \(filename)")
+            }
         } else {
             // Create new script file
             filename = scriptStore.saveScript(content: scriptContent, name: name)
