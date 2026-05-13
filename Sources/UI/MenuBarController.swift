@@ -2,7 +2,7 @@ import AppKit
 
 class MenuBarController: NSObject {
     private var statusItem: NSStatusItem!
-    private var settingsWindow: SettingsWindow?
+    private var settingsWindowController: SettingsWindowController?
     private var nltWindow: NLTInputWindow?
     private var shortcutListWindow: ShortcutListWindow?
     private var logWindow: LogWindow?
@@ -50,12 +50,12 @@ class MenuBarController: NSObject {
     }
 
     @objc private func openSettings() {
-        if settingsWindow == nil {
-            settingsWindow = SettingsWindow()
-            settingsWindow?.delegate = self
+        if settingsWindowController == nil {
+            settingsWindowController = SettingsWindowController()
         }
-        settingsWindow?.makeKeyAndOrderFront(nil)
+        settingsWindowController?.window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        settingsWindowController?.loadSettings()
     }
 
     @objc private func openNLT() {
@@ -118,7 +118,7 @@ class MenuBarController: NSObject {
 extension MenuBarController: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
-        if window === settingsWindow { settingsWindow = nil }
+        if window === settingsWindowController?.window { settingsWindowController = nil }
         if window === nltWindow { nltWindow = nil }
         if window === shortcutListWindow { shortcutListWindow = nil }
         if window === logWindow { logWindow = nil }
