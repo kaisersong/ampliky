@@ -145,9 +145,9 @@ class ConfigStore {
     }
 
     func setShowMenubar(_ show: Bool) {
-        let prefs: [String: Any] = ["showMenubar": show]
-        let data = try? JSONSerialization.data(withJSONObject: prefs)
-        try? data?.write(to: prefsFile, options: .atomic)
+        var prefs = loadPrefs()
+        prefs["showMenubar"] = show
+        savePrefs(prefs)
     }
 
     // MARK: - LLM Config
@@ -218,7 +218,8 @@ class ConfigStore {
     }
 
     private func savePrefs(_ prefs: [String: Any]) {
-        let data = try? JSONSerialization.data(withJSONObject: prefs)
-        try? data?.write(to: prefsFile, options: .atomic)
+        let data = try! JSONSerialization.data(withJSONObject: prefs)
+        try! data.write(to: prefsFile, options: .atomic)
+        print("[Ampliky] Saved prefs to \(prefsFile.path): \(prefs)")
     }
 }

@@ -60,6 +60,7 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func windowWillClose(_ notification: Notification) {
+        print("[Ampliky] Settings window closing, saving...")
         save()
     }
 
@@ -225,11 +226,8 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         let idx = providerPopup.indexOfSelectedItem
         let provider = LLMProvider.all[idx]
         updateModelPopup(models: provider.availableModels, defaultModel: provider.defaultModel)
-        // Auto-fill default baseUrl if user hasn't set a custom one
-        let currentBase = baseUrlField.stringValue
-        if currentBase.isEmpty {
-            baseUrlField.stringValue = provider.baseUrl
-        }
+        // Always update baseUrl when provider changes
+        baseUrlField.stringValue = provider.baseUrl
     }
 
     private func updateModelPopup(models: [String], defaultModel: String) {
@@ -244,6 +242,9 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
     }
 
     @objc private func testConnection() {
+        // Auto-save before testing
+        save()
+
         llmStatusLabel.stringValue = "正在测试..."; llmStatusLabel.textColor = .systemBlue; testBtn.isEnabled = false
         let config = buildLLMConfig()
         let client = LLMClient(config: config)
@@ -300,6 +301,7 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func save() {
+        print("[Ampliky] SettingsWindow save() called")
         let prefs = ConfigStore()
         prefs.saveLLMConfig(buildLLMConfig())
         prefs.setShowMenubar(showMenubarCheckbox?.state == .on)
