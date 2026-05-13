@@ -35,6 +35,12 @@ class ShortcutListWindow: NSWindow {
         tableView.selectionHighlightStyle = .regular
         tableView.focusRingType = .none
 
+        // Enable/disable column
+        let enabledCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("enabled"))
+        enabledCol.title = "启用"
+        enabledCol.minWidth = 50; enabledCol.maxWidth = 50
+        tableView.addTableColumn(enabledCol)
+
         let nameCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("name"))
         nameCol.title = "名称"
         nameCol.minWidth = 160; nameCol.maxWidth = 200
@@ -54,11 +60,15 @@ class ShortcutListWindow: NSWindow {
         tableView.delegate = self
         scroll.documentView = tableView
 
-        let deleteBtn = NSButton(title: "🗑 删除选中", target: self, action: #selector(deleteSelected))
-        deleteBtn.frame = NSRect(x: 15, y: 5, width: 90, height: 30)
+        let deleteBtn = NSButton(title: "删除选中", target: self, action: #selector(deleteSelected))
+        deleteBtn.frame = NSRect(x: 15, y: 5, width: 70, height: 30)
         deleteBtn.bezelStyle = .rounded
         deleteBtn.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         toolbar.addSubview(deleteBtn)
+    }
+
+    func refresh() {
+        loadShortcuts()
     }
 
     private func loadShortcuts() {
@@ -83,6 +93,29 @@ class ShortcutListWindow: NSWindow {
             loadShortcuts()
         }
     }
+
+    @objc private func toggleEnabled(_ sender: NSButton) {
+        let row = sender.tag
+        guard row >= 0 && row < shortcuts.count else { return }
+        let shortcut = shortcuts[row]
+        let store = ConfigStore()
+
+        // Remove old rule and add with toggled enabled
+        store.removeRule(id: shortcut.id)
+        let newRule = Rule(
+            id: shortcut.id,
+            name: shortcut.name,
+            trigger: shortcut.trigger,
+            actions: shortcut.actions,
+            enabled: !shortcut.enabled,
+            source: shortcut.source,
+            scriptPath: shortcut.scriptPath
+        )
+        store.addRule(newRule)
+
+        Logger.shared.log(level: .info, message: "快捷指令 \(newRule.enabled ? "启用" : "禁用"): \(shortcut.name)")
+        loadShortcuts()
+    }
 }
 
 extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
@@ -90,9 +123,24 @@ extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let shortcut = shortcuts[row]
+        let columnId = tableColumn?.identifier.rawValue ?? ""
+
+        if columnId == "enabled" {
+            let btn = NSButton(checkboxWithTitle: "", target: self, action: #selector(toggleEnabled(_:)))
+            btn.tag = row
+            btn.state = shortcut.enabled ? .on : .off
+            btn.font = NSFont.systemFont(ofSize: 11)
+            return btn
+        }
+
         let cell = NSTextField(labelWithString: "")
         cell.font = NSFont.systemFont(ofSize: 13)
-        cell.stringValue = rowValue(shortcut, column: tableColumn?.identifier.rawValue ?? "")
+
+        if !shortcut.enabled {
+            cell.textColor = NSColor.secondaryLabelColor
+        }
+
+        cell.stringValue = rowValue(shortcut, column: columnId)
         return cell
     }
 
@@ -108,7 +156,7 @@ extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
     private func triggerDescription(_ trigger: RuleTrigger) -> String {
         switch trigger {
         case .hotkey(let key): return key
-        case .wifi(let ssid): return "📶 \(ssid)"
+        case .wifi(let ssid): return ssid
         case .display(let count): return "\(count) 屏"
         case .time(let from, let to): return "\(from) - \(to)"
         }

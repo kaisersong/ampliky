@@ -86,10 +86,20 @@ class HotkeyTrigger {
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let nsFlags = NSEvent.ModifierFlags(rawValue: UInt(flags.rawValue))
 
+        #if DEBUG
+        print("[Ampliky] Key event: keyCode=\(keyCode), flags=\(flags.rawValue), nsFlags=\(nsFlags.rawValue)")
+        #endif
+
         for (keySpec, callback) in hotkeyCallbacks {
             guard let (expectedMods, expectedKey) = HotkeyTrigger.parseKeySpec(keySpec) else { continue }
             let expectedKeyCode = Self.keyCode(for: expectedKey)
+            #if DEBUG
+            print("[Ampliky] Checking \(keySpec): expected keyCode=\(expectedKeyCode), expected mods=\(expectedMods.rawValue)")
+            #endif
             if keyCode == expectedKeyCode && nsFlags.contains(expectedMods) {
+                #if DEBUG
+                print("[Ampliky] MATCH! Firing callback for \(keySpec)")
+                #endif
                 callback()
             }
         }

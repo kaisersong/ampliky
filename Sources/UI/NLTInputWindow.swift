@@ -1,5 +1,9 @@
 import AppKit
 
+protocol NLTInputWindowDelegate: AnyObject {
+    func nltInputWindowDidSave(_ window: NLTInputWindow)
+}
+
 class NLTInputWindow: NSWindow {
     private var inputView: NSTextView!
     private var generateBtn: NSButton!
@@ -157,11 +161,14 @@ class NLTInputWindow: NSWindow {
         store.addRule(shortcut)
 
         Logger.shared.log(level: .info, message: "保存快捷指令: \(intent)")
-        statusLabel.stringValue = "✅ 已保存"
+        statusLabel.stringValue = "已保存"
         statusLabel.textColor = .systemGreen
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.close()
+            if let delegate = self.delegate as? NLTInputWindowDelegate {
+                delegate.nltInputWindowDidSave(self)
+            }
         }
     }
 

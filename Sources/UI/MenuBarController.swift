@@ -78,13 +78,21 @@ class MenuBarController: NSObject {
     }
 
     @objc private func openNLT() {
-        if nltWindow == nil { nltWindow = NLTInputWindow(); nltWindow?.delegate = self }
+        if nltWindow == nil {
+            nltWindow = NLTInputWindow()
+            nltWindow?.delegate = self
+        }
         nltWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc private func openShortcutList() {
-        if shortcutListWindow == nil { shortcutListWindow = ShortcutListWindow(); shortcutListWindow?.delegate = self }
+        if shortcutListWindow == nil {
+            shortcutListWindow = ShortcutListWindow()
+            shortcutListWindow?.delegate = self
+        } else {
+            shortcutListWindow?.refresh()
+        }
         shortcutListWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -173,5 +181,12 @@ extension MenuBarController: NSWindowDelegate {
         if window === shortcutListWindow { shortcutListWindow = nil }
         if window === logWindow { logWindow = nil }
         if window === debugLogWindow { debugLogWindow = nil }
+    }
+}
+
+extension MenuBarController: NLTInputWindowDelegate {
+    func nltInputWindowDidSave(_ window: NLTInputWindow) {
+        // Open shortcut list after saving a new shortcut
+        openShortcutList()
     }
 }
