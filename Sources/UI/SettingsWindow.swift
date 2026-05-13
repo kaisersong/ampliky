@@ -64,6 +64,12 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate {
         save()
     }
 
+    override func cancelOperation(_ sender: Any?) {
+        // Called when user clicks close button or presses Cmd+W
+        save()
+        window?.orderOut(sender)
+    }
+
     private func buildUI() {
         containerView = NSView(frame: NSRect(x: 0, y: 0, width: 540, height: 440))
 
