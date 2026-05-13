@@ -24,18 +24,24 @@ class MenuBarController: NSObject {
         menu.addItem(titleItem)
         menu.addItem(NSMenuItem.separator())
 
-        menu.addItem(NSMenuItem(title: "✚ 新建快捷指令...", action: #selector(openNLT), keyEquivalent: "n"))
-        menu.addItem(NSMenuItem(title: "📋 快捷指令列表", action: #selector(openShortcutList), keyEquivalent: "l"))
-        menu.addItem(NSMenuItem(title: "🤖 LLM 配置", action: #selector(openLLMConfig), keyEquivalent: ","))
-        menu.addItem(NSMenuItem(title: "📝 运行日志", action: #selector(openLog), keyEquivalent: ""))
+        addItem(menu, "✚ 新建快捷指令...", #selector(openNLT), "n")
+        addItem(menu, "📋 快捷指令列表", #selector(openShortcutList), "l")
+        addItem(menu, "🤖 LLM 配置", #selector(openLLMConfig), ",")
+        addItem(menu, "📝 运行日志", #selector(openLog), "")
         menu.addItem(NSMenuItem.separator())
 
         let hideTitle = ConfigStore().shouldShowMenubar() ? "⚙ 隐藏图标" : "⚙ 显示图标"
-        menu.addItem(NSMenuItem(title: hideTitle, action: #selector(toggleMenubar), keyEquivalent: ""))
+        addItem(menu, hideTitle, #selector(toggleMenubar), "")
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(NSMenuItem(title: "退出 Ampliky", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusItem.menu = menu
+    }
+
+    private func addItem(_ menu: NSMenu, _ title: String, _ action: Selector, _ key: String) {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
+        item.target = self
+        menu.addItem(item)
     }
 
     @objc private func openNLT() {

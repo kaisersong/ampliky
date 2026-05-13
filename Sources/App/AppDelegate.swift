@@ -17,7 +17,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let rules = configStore.loadRules()
-        ruleEngine = RuleEngine(rules: rules)
+
+        // Seed default teleport shortcuts on first launch
+        if rules.isEmpty {
+            seedDefaultShortcuts()
+        }
+
+        ruleEngine = RuleEngine(rules: configStore.loadRules())
 
         hotkeyTrigger = HotkeyTrigger()
         registerHotkeys(rules: rules)
@@ -66,6 +72,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if let name = action.params["name"] { AppAction.quit(name: name) }
         default: break
         }
+    }
+
+    private func seedDefaultShortcuts() {
+        let scriptStore = ScriptStore()
+
+        // Shortcut 1: ⌘⌥→ 跳到下一个屏幕
+        let script1 = "Ampliky.cursor.warpNext()"
+        let file1 = scriptStore.saveScript(content: script1, name: "跳到下一个屏幕")
+        configStore.addRule(Rule(
+            id: UUID().uuidString, name: "跳到下一个屏幕",
+            trigger: .hotkey(key: "cmd+opt+right"),
+            actions: [], enabled: true, source: "user", scriptPath: file1
+        ))
+
+        // Shortcut 2: ⌘⌥← 跳到上一个屏幕
+        let script2 = "Ampliky.cursor.warpPrev()"
+        let file2 = scriptStore.saveScript(content: script2, name: "跳到上一个屏幕")
+        configStore.addRule(Rule(
+            id: UUID().uuidString, name: "跳到上一个屏幕",
+            trigger: .hotkey(key: "cmd+opt+left"),
+            actions: [], enabled: true, source: "user", scriptPath: file2
+        ))
+
+        Logger.shared.log(level: .info, message: "初始化默认快捷指令: 跳屏 ⌘⌥→/←")
     }
 
     private func handleRPC(_ request: RPCRequest) -> Data {
