@@ -1,7 +1,7 @@
 import AppKit
 import ServiceManagement
 
-class SettingsWindowController: NSWindowController {
+class SettingsWindowController: NSWindowController, NSWindowDelegate {
 
     private var containerView: NSView!
     private var tabBar: NSView!
@@ -45,6 +45,9 @@ class SettingsWindowController: NSWindowController {
 
         buildUI()
 
+        // Auto-save when window closes
+        panel.delegate = self
+
         // Activate app synchronously before showing window
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
@@ -55,6 +58,10 @@ class SettingsWindowController: NSWindowController {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func windowWillClose(_ notification: Notification) {
+        save()
+    }
 
     private func buildUI() {
         containerView = NSView(frame: NSRect(x: 0, y: 0, width: 540, height: 440))

@@ -33,7 +33,6 @@
 		ABE82058CDCFEC327D4CE661 /* NLTInputWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */; };
 		B7865DD0320F72C0CF3DBFFF /* PermissionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0D321EBD739251C4431B90 /* PermissionChecker.swift */; };
 		B8EE323860C3F24896B31163 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120604B2A469BBFBDDA90033 /* SettingsWindow.swift */; };
-		BBA63C5BECA8615A13BF6FE5 /* LLMConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509544993147C574AB054FDF /* LLMConfigWindow.swift */; };
 		C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA3E5FF81FC344130585207 /* ScriptStore.swift */; };
 		C777810049CB03118C99CE2C /* AppAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D530725314CF2D27DAF15 /* AppAction.swift */; };
 		D78A0A3FDBCAC2F1C2AFF5CB /* ConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */; };
@@ -64,7 +63,6 @@
 		47258409620CFB2883F57AA2 /* SelfHealer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfHealer.swift; sourceTree = "<group>"; };
 		4AD2E0440CF461242C4FF7D2 /* LLMClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
 		4E37C2085818E7F116FE9675 /* CursorAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorAction.swift; sourceTree = "<group>"; };
-		509544993147C574AB054FDF /* LLMConfigWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMConfigWindow.swift; sourceTree = "<group>"; };
 		5F099D6097967E18E668CD58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		60245B2B701DFB097ADB3820 /* CursorActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorActionTests.swift; sourceTree = "<group>"; };
 		76462A8BAE4A7C2981F4CE78 /* ShortcutListWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutListWindow.swift; sourceTree = "<group>"; };
@@ -217,7 +215,6 @@
 		F1B7F7CC633584B3066C91A8 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				509544993147C574AB054FDF /* LLMConfigWindow.swift */,
 				978EEB6F592E1CE03FD02184 /* LogWindow.swift */,
 				B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */,
 				DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */,
@@ -343,7 +340,6 @@
 				16F63EB52B0317605452D45E /* HotkeyTrigger.swift in Sources */,
 				82B09168EBD8B593E3FAFDD9 /* JSCRunner.swift in Sources */,
 				148E491C3B3C5CB6CC0CD9D5 /* LLMClient.swift in Sources */,
-				BBA63C5BECA8615A13BF6FE5 /* LLMConfigWindow.swift in Sources */,
 				90DA78F89570A146BC8919E0 /* LogWindow.swift in Sources */,
 				2A0AFB0BB917C6468706A3E6 /* Logger.swift in Sources */,
 				51FCB3B4B71122EA9D7FBE51 /* MenuBarController.swift in Sources */,

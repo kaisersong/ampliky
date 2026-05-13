@@ -54,7 +54,10 @@ class HotkeyTrigger {
                 return Unmanaged.passUnretained(event)
             },
             userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ) else { return }
+        ) else {
+            print("[Ampliky] ⚠️ Hotkey event tap failed to create — check Input Monitoring permission")
+            return
+        }
 
         self.eventTap = tap
         let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)

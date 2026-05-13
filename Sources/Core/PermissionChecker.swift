@@ -4,13 +4,12 @@ import Carbon
 enum PermissionChecker {
 
     static func hasInputMonitoringPermission() -> Bool {
-        // AXIsProcessTrusted is the reliable way to check if we have accessibility
-        // For input monitoring, we try to create an event tap - if it fails, we don't have permission
+        // Try to create an event tap - if it fails, we don't have permission
         let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
         let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap,
                                      options: .defaultTap, eventsOfInterest: mask,
                                      callback: { _, _, _, _ in nil }, userInfo: nil)
-        if tap != nil {
+        if let tap = tap {
             CFMachPortInvalidate(tap)
             return true
         }
@@ -18,7 +17,7 @@ enum PermissionChecker {
     }
 
     static func requestInputMonitoring() {
-        // Trigger the system prompt by creating a disabled event tap
+        // Attempt to create event tap to trigger system prompt
         let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
         _ = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap,
                                options: .defaultTap, eventsOfInterest: mask,
@@ -38,11 +37,16 @@ enum PermissionChecker {
         let needsInput = !hasInputMonitoringPermission()
         let needsAccess = !hasAccessibilityPermission()
 
-        guard needsInput || needsAccess else { return }
+        guard needsInput || needsAccess else {
+            Logger.shared.log(level: .info, message: "权限检查通过，无需请求")
+            return
+        }
 
         var info = "Ampliky 需要以下权限来正常工作：\n"
         if needsInput { info += "• 输入监控 — 监听全局快捷键\n" }
         if needsAccess { info += "• 辅助功能 — 管理窗口位置" }
+
+        Logger.shared.log(level: .info, message: "请求权限: \(info)")
 
         let alert = NSAlert()
         alert.messageText = "需要权限"
