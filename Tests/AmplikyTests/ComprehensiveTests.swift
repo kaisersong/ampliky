@@ -164,3 +164,53 @@ final class RuleEngineScriptTests: XCTestCase {
         XCTAssertEqual(rule.actions.count, 1)
     }
 }
+
+// MARK: - Dry-run tests
+
+final class JSCDryRunTests: XCTestCase {
+    var runner: JSCRunner!
+
+    override func setUp() {
+        runner = JSCRunner()
+    }
+
+    func testDryRunCapturesWarpNext() {
+        let calls = runner.dryRun(script: "Ampliky.cursor.warpNext()")
+        XCTAssertEqual(calls.count, 1)
+        XCTAssertTrue(calls[0].contains("warpNext"))
+    }
+
+    func testDryRunCapturesMultipleCalls() {
+        let calls = runner.dryRun(script: """
+        Ampliky.cursor.warpNext();
+        Ampliky.app.launch('Warp');
+        Ampliky.app.launch('Slack');
+        """)
+        XCTAssertEqual(calls.count, 3)
+        XCTAssertTrue(calls[0].contains("warpNext"))
+        XCTAssertTrue(calls[1].contains("launch"))
+        XCTAssertTrue(calls[2].contains("launch"))
+    }
+
+    func testDryRunCapturesClipboard() {
+        let calls = runner.dryRun(script: "Ampliky.system.clipboard('hello')")
+        XCTAssertEqual(calls.count, 1)
+        XCTAssertTrue(calls[0].contains("clipboard"))
+    }
+
+    func testDryRunDoesNotExecuteRealOperations() {
+        // Dry-run should not move cursor or launch apps
+        let calls = runner.dryRun(script: """
+        Ampliky.cursor.warpTo(99);
+        Ampliky.app.quit('Finder');
+        """)
+        // Even though warpTo(99) would be invalid, dry-run just records it
+        XCTAssertGreaterThanOrEqual(calls.count, 2)
+    }
+
+    func testDryRunWithInvalidScript() {
+        let calls = runner.dryRun(script: "throw new Error('test')")
+        // Should not crash, just return empty or partial calls
+        XCTAssertNotNil(calls)
+    }
+}

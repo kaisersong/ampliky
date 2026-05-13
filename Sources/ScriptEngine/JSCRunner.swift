@@ -31,6 +31,54 @@ class JSCRunner {
         registerAPIs()
     }
 
+    // Dry-run: execute script with mocked APIs to collect what it would do
+    func dryRun(script: String) -> [String] {
+        var calls: [String] = []
+
+        let ctx = JSContext()!
+        ctx.evaluateScript("eval = undefined;")
+        ctx.evaluateScript("Function = undefined;")
+
+        // Mock Ampliky APIs to just record calls
+        ctx.setObject(unsafeBitCast({ (msg: String) in
+            calls.append(msg)
+        } as @convention(block) (String) -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_record" as NSString)
+
+        ctx.evaluateScript("""
+        var Ampliky = {
+            screen: {
+                count: function() { return 2; },
+                list: function() { return JSON.stringify([{id:0,width:1920,height:1080},{id:1,width:2560,height:1440}]); },
+                current: function() { return JSON.stringify({x:0,y:0,width:1920,height:1080}); }
+            },
+            cursor: {
+                position: function() { return JSON.stringify({x:960,y:540}); },
+                moveTo: function(x, y) { __ampliky_record('cursor.moveTo(' + x + ', ' + y + ')'); },
+                warpNext: function() { __ampliky_record('cursor.warpNext()'); },
+                warpPrev: function() { __ampliky_record('cursor.warpPrev()'); },
+                warpTo: function(i) { __ampliky_record('cursor.warpTo(' + i + ')'); }
+            },
+            app: {
+                launch: function(n) { __ampliky_record('app.launch("' + n + '")'); },
+                quit: function(n) { __ampliky_record('app.quit("' + n + '")'); },
+                running: function(n) { return false; },
+                frontmost: function() { return 'Finder'; }
+            },
+            system: {
+                clipboard: function(t) {
+                    if (t !== undefined) { __ampliky_record('system.clipboard(set)'); return t; }
+                    return '';
+                }
+            }
+        };
+        """)
+
+        ctx.evaluateScript(script)
+
+        return calls
+    }
+
     func execute(script: String) -> ScriptResult {
         // Size check
         let lineCount = script.components(separatedBy: .newlines).filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
