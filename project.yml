@@ -49,6 +49,14 @@ targets:
       configs:
         Debug:
           OTHER_SWIFT_FLAGS: "-D DEBUG"
+    preBuildScripts:
+      - name: Reset permissions (Debug only)
+        script: |
+          if [ "$CONFIGURATION" = "Debug" ]; then
+            echo "[Ampliky] Debug build: resetting permissions"
+            tccutil reset All com.kaisersong.ampliky 2>/dev/null || true
+          fi
+        basedOnDependencyAnalysis: false
     entitlements:
       path: Sources/App/Ampliky.entitlements
       properties:

@@ -92,4 +92,23 @@ enum PermissionChecker {
             Logger.shared.log(level: .error, message: "权限检查失败: \(error.localizedDescription)")
         }
     }
+
+    // Reset all TCC permissions for this app - used in debug builds only
+    static func resetAllPermissions() {
+        do {
+            let task = Process()
+            task.launchPath = "/usr/bin/tccutil"
+            task.arguments = ["reset", "All", "com.kaisersong.ampliky"]
+            let pipe = Pipe()
+            task.standardOutput = pipe
+            task.standardError = pipe
+            try task.run()
+            task.waitUntilExit()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            Logger.shared.log(level: .debug, message: "权限重置完成: \(output.trimmingCharacters(in: .whitespacesAndNewlines))")
+        } catch {
+            Logger.shared.log(level: .error, message: "权限重置失败: \(error.localizedDescription)")
+        }
+    }
 }

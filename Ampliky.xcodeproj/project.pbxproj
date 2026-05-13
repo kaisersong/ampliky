@@ -247,6 +247,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 584A210F5421644738A362E3 /* Build configuration list for PBXNativeTarget "Ampliky" */;
 			buildPhases = (
+				7600C12137758CAA964F80C3 /* Reset permissions (Debug only) */,
 				3569AAF383DF9D1899978292 /* Sources */,
 				C08379F17FA4D20D4A235F11 /* Resources */,
 			);
@@ -328,6 +329,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7600C12137758CAA964F80C3 /* Reset permissions (Debug only) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Reset permissions (Debug only)";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n  echo \"[Ampliky] Debug build: resetting permissions\"\n  tccutil reset All com.kaisersong.ampliky 2>/dev/null || true\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3569AAF383DF9D1899978292 /* Sources */ = {

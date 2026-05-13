@@ -34,6 +34,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             menuBar?.setup()
         }
 
+        #if DEBUG
+        // Reset permissions on every debug build so macOS doesn't get confused
+        // by changing code signatures between builds
+        PermissionChecker.resetAllPermissions()
+        #endif
+
         let rules = configStore.loadRules()
 
         // Seed default teleport shortcuts on first launch
