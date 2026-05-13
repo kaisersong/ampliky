@@ -35,9 +35,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         #if DEBUG
-        // Reset permissions on every debug build so macOS doesn't get confused
-        // by changing code signatures between builds
-        PermissionChecker.resetAllPermissions()
+        // In debug builds, always try to register in TCC so the app appears in System Settings
+        // Don't reset - just ensure the app is registered
+        PermissionChecker.ensureRegisteredInTCC()
         #endif
 
         let rules = configStore.loadRules()

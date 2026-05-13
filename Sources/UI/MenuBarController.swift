@@ -51,6 +51,11 @@ class MenuBarController: NSObject {
         debugItem.target = self
         menu.addItem(debugItem)
 
+        // Permission settings (debug only)
+        #if DEBUG
+        addItem(menu, "权限设置", #selector(openPermissionSettings))
+        #endif
+
         // Log viewer
         addItem(menu, "日志查看器", #selector(openDebugLog))
 
@@ -108,6 +113,20 @@ class MenuBarController: NSObject {
         debugLogWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
+
+    #if DEBUG
+    @objc private func openPermissionSettings() {
+        let alert = NSAlert()
+        alert.messageText = "权限设置"
+        alert.informativeText = "请在系统设置中勾选 Ampliky：\n\n1. 输入监控 — 监听快捷键\n2. 辅助功能 — 管理窗口\n\n如果列表中没有 Ampliky，请点击右下角 + 号手动添加。"
+        alert.addButton(withTitle: "去设置")
+        alert.addButton(withTitle: "取消")
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+        }
+    }
+    #endif
 
     @objc private func toggleMenubar() {
         let store = ConfigStore()

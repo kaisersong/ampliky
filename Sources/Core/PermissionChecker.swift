@@ -2,113 +2,101 @@ import AppKit
 import Carbon
 
 enum PermissionChecker {
-    // RTLD_DEFAULT for dlsym
-    private static let rtldDefault = UnsafeMutableRawPointer(bitPattern: -2)
 
-    // Check if we have Input Monitoring permission
+    // Check if we have Input Monitoring permission by trying to create an event tap
     static func hasInputMonitoringPermission() -> Bool {
-        do {
-            guard let handle = dlopen(nil, RTLD_NOW),
-                  let sym = dlsym(handle, "CGPreflightListenEventAccess") else {
-                return false
-            }
-            dlclose(handle)
-            typealias Fn = @convention(c) () -> Bool
-            return unsafeBitCast(sym, to: Fn.self)()
-        } catch {
-            Logger.shared.log(level: .error, message: "检查输入监控权限失败: \(error.localizedDescription)")
-            return false
+        let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
+        let tap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .listenOnly,
+            eventsOfInterest: mask,
+            callback: { _, _, _, _ in nil },
+            userInfo: nil
+        )
+        if let tap = tap {
+            CFMachPortInvalidate(tap)
+            return true
         }
+        return false
     }
 
-    // Request Input Monitoring permission - shows system prompt and registers in TCC
+    // Request Input Monitoring permission by trying to create an event tap.
+    // If the app is not in TCC, macOS will automatically add it and prompt the user.
     static func requestInputMonitoringPermission() {
-        do {
-            guard let handle = dlopen(nil, RTLD_NOW),
-                  let sym = dlsym(handle, "CGRequestListenEventAccess") else {
-                Logger.shared.log(level: .error, message: "无法找到 CGRequestListenEventAccess")
-                return
-            }
-            dlclose(handle)
-            typealias Fn = @convention(c) () -> Void
-            unsafeBitCast(sym, to: Fn.self)()
-        } catch {
-            Logger.shared.log(level: .error, message: "请求输入监控权限失败: \(error.localizedDescription)")
-        }
+        let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
+        _ = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .listenOnly,
+            eventsOfInterest: mask,
+            callback: { _, _, _, _ in nil },
+            userInfo: nil
+        )
+        Logger.shared.log(level: .debug, message: "已尝试注册输入监控权限")
     }
 
     static func hasAccessibilityPermission() -> Bool {
-        do {
-            return AXIsProcessTrusted()
-        } catch {
-            Logger.shared.log(level: .error, message: "检查辅助功能权限失败: \(error.localizedDescription)")
-            return false
-        }
+        return AXIsProcessTrusted()
     }
 
     static func requestAccessibilityPermission() {
-        do {
-            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-            AXIsProcessTrustedWithOptions(options)
-        } catch {
-            Logger.shared.log(level: .error, message: "请求辅助功能权限失败: \(error.localizedDescription)")
-        }
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        AXIsProcessTrustedWithOptions(options)
     }
 
     static func checkAndPrompt() {
-        do {
-            let needsInput = !hasInputMonitoringPermission()
-            let needsAccess = !hasAccessibilityPermission()
+        let needsInput = !hasInputMonitoringPermission()
+        let needsAccess = !hasAccessibilityPermission()
 
-            guard needsInput || needsAccess else {
-                Logger.shared.log(level: .info, message: "权限检查通过")
-                return
-            }
+        guard needsInput || needsAccess else {
+            Logger.shared.log(level: .info, message: "权限检查通过")
+            return
+        }
 
-            var info = "Ampliky 需要以下权限：\n"
-            if needsInput { info += "• 输入监控 — 监听全局快捷键\n" }
-            if needsAccess { info += "• 辅助功能 — 管理窗口位置" }
+        // Request Input Monitoring FIRST by creating an event tap
+        // This registers the app in TCC and may trigger a system prompt
+        if needsInput {
+            requestInputMonitoringPermission()
+            // Give macOS a moment to process the registration
+            Thread.sleep(forTimeInterval: 0.5)
+        }
 
-            Logger.shared.log(level: .info, message: "请求权限")
+        var info = "Ampliky 需要以下权限：\n"
+        if needsInput { info += "• 输入监控 — 监听全局快捷键\n" }
+        if needsAccess { info += "• 辅助功能 — 管理窗口位置" }
+        info += "\n请在系统设置中勾选 Ampliky。"
 
-            let alert = NSAlert()
-            alert.messageText = "需要权限"
-            alert.informativeText = info
-            alert.addButton(withTitle: "去设置")
-            alert.addButton(withTitle: "稍后")
+        Logger.shared.log(level: .info, message: "请求权限")
 
-            if alert.runModal() == .alertFirstButtonReturn {
-                // Request Input Monitoring permission (this registers the app in TCC)
-                if needsInput { requestInputMonitoringPermission() }
-                if needsAccess { requestAccessibilityPermission() }
-                // Open System Settings after a short delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-                        NSWorkspace.shared.open(url)
-                    }
+        let alert = NSAlert()
+        alert.messageText = "需要权限"
+        alert.informativeText = info
+        alert.addButton(withTitle: "去设置")
+        alert.addButton(withTitle: "稍后")
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            if needsAccess { requestAccessibilityPermission() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                    NSWorkspace.shared.open(url)
                 }
             }
-        } catch {
-            Logger.shared.log(level: .error, message: "权限检查失败: \(error.localizedDescription)")
         }
     }
 
-    // Reset all TCC permissions for this app - used in debug builds only
-    static func resetAllPermissions() {
-        do {
-            let task = Process()
-            task.launchPath = "/usr/bin/tccutil"
-            task.arguments = ["reset", "All", "com.kaisersong.ampliky"]
-            let pipe = Pipe()
-            task.standardOutput = pipe
-            task.standardError = pipe
-            try task.run()
-            task.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: data, encoding: .utf8) ?? ""
-            Logger.shared.log(level: .debug, message: "权限重置完成: \(output.trimmingCharacters(in: .whitespacesAndNewlines))")
-        } catch {
-            Logger.shared.log(level: .error, message: "权限重置失败: \(error.localizedDescription)")
-        }
+    // Ensure the app is registered in TCC database so it appears in System Settings.
+    static func ensureRegisteredInTCC() {
+        // Try to create an event tap - this registers the app in TCC
+        let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
+        _ = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .listenOnly,
+            eventsOfInterest: mask,
+            callback: { _, _, _, _ in nil },
+            userInfo: nil
+        )
+        Logger.shared.log(level: .debug, message: "已请求注册到输入监控列表")
     }
 }
