@@ -175,6 +175,49 @@ class ConfigStore {
             "apiKey": config.apiKey,
             "baseUrl": config.baseUrl
         ]
+        savePrefs(prefs)
+    }
+
+    // MARK: - General Prefs
+
+    func shouldAutoUpdate() -> Bool {
+        guard let data = try? Data(contentsOf: prefsFile),
+              let prefs = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return true
+        }
+        return prefs["autoUpdate"] as? Bool ?? true
+    }
+
+    func setAutoUpdate(_ enabled: Bool) {
+        var prefs = loadPrefs()
+        prefs["autoUpdate"] = enabled
+        prefs["showMenubar"] = shouldShowMenubar()
+        if let llm = prefs["llm"] as? [String: Any] {
+            prefs["llm"] = llm
+        }
+        savePrefs(prefs)
+    }
+
+    func getToggleMenubarHotkey() -> String {
+        guard let data = try? Data(contentsOf: prefsFile),
+              let prefs = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let hk = prefs["toggleMenubarHotkey"] as? String else {
+            return "cmd+opt+control+h"
+        }
+        return hk
+    }
+
+    func setToggleMenubarHotkey(_ key: String) {
+        var prefs = loadPrefs()
+        prefs["toggleMenubarHotkey"] = key
+        savePrefs(prefs)
+    }
+
+    private func loadPrefs() -> [String: Any] {
+        (try? Data(contentsOf: prefsFile)).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] } ?? [:]
+    }
+
+    private func savePrefs(_ prefs: [String: Any]) {
         let data = try? JSONSerialization.data(withJSONObject: prefs)
         try? data?.write(to: prefsFile, options: .atomic)
     }

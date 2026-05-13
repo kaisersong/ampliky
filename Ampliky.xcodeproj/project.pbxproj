@@ -32,6 +32,7 @@
 		A84610B2201EE9FC59EBA0F2 /* ActionSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1ABEDA79D2F047F1E0E429B /* ActionSchemaTests.swift */; };
 		ABE82058CDCFEC327D4CE661 /* NLTInputWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */; };
 		B7865DD0320F72C0CF3DBFFF /* PermissionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0D321EBD739251C4431B90 /* PermissionChecker.swift */; };
+		B8EE323860C3F24896B31163 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120604B2A469BBFBDDA90033 /* SettingsWindow.swift */; };
 		BBA63C5BECA8615A13BF6FE5 /* LLMConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509544993147C574AB054FDF /* LLMConfigWindow.swift */; };
 		C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA3E5FF81FC344130585207 /* ScriptStore.swift */; };
 		C777810049CB03118C99CE2C /* AppAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D530725314CF2D27DAF15 /* AppAction.swift */; };
@@ -56,6 +57,7 @@
 		0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStoreTests.swift; sourceTree = "<group>"; };
 		0D0D530725314CF2D27DAF15 /* AppAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAction.swift; sourceTree = "<group>"; };
 		112AA3D58729C7FA23ED8B42 /* Ampliky.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ampliky.entitlements; sourceTree = "<group>"; };
+		120604B2A469BBFBDDA90033 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		22013EDAC4243EF2FA0D3A9D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		296D7A08B1509D83614BB92A /* SelfHealerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfHealerTests.swift; sourceTree = "<group>"; };
 		40CE1B5D589E31A41CBAC2AA /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
@@ -219,6 +221,7 @@
 				978EEB6F592E1CE03FD02184 /* LogWindow.swift */,
 				B9ECD2E7F327630DA0A1A804 /* MenuBarController.swift */,
 				DEE6A6E3B38D15CC85F4BB17 /* NLTInputWindow.swift */,
+				120604B2A469BBFBDDA90033 /* SettingsWindow.swift */,
 				76462A8BAE4A7C2981F4CE78 /* ShortcutListWindow.swift */,
 			);
 			path = UI;
@@ -349,6 +352,7 @@
 				DF4C18E1D88B4DAA01E68CA9 /* RuleEngine.swift in Sources */,
 				C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */,
 				4E8FA2D79DD711E3530D0F32 /* SelfHealer.swift in Sources */,
+				B8EE323860C3F24896B31163 /* SettingsWindow.swift in Sources */,
 				DF5E2D4A06165FB10F44E20D /* ShortcutListWindow.swift in Sources */,
 				366EF29D1379174625DE814A /* SocketServer.swift in Sources */,
 				A82CD09C044B7BF8FA2679E4 /* SystemPrompt.swift in Sources */,
