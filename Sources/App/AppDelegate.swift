@@ -8,6 +8,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var ruleEngine: RuleEngine!
     var hotkeyTrigger: HotkeyTrigger!
     var gestureTrigger: GestureTrigger!
+    var displayWatcher: DisplayWatcher!
     var socketServer: SocketServer!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -61,6 +62,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         gestureTrigger = GestureTrigger()
         registerGestures(rules: configStore.loadRules())
         gestureTrigger.start()
+
+        // Set up display watcher for auto-layout on display connect
+        displayWatcher = DisplayWatcher()
+        displayWatcher.start { [weak self] displayIDs in
+            for displayID in displayIDs {
+                self?.executeDisplayRules(displayID: displayID)
+            }
+        }
 
         socketServer = SocketServer()
         socketServer.setHandler { [weak self] request in
@@ -119,8 +128,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 #if DEBUG
                 print("[Ampliky] Registered gesture: \(gestureKey) -> \(rule.name)")
                 #endif
+            case .display(let displayID):
+                // Display-specific rules are handled by DisplayWatcher
+                #if DEBUG
+                print("[Ampliky] Registered display rule: \(displayID) -> \(rule.name)")
+                #endif
             default:
                 break
+            }
+        }
+    }
+
+    private func executeDisplayRules(displayID: String) {
+        let rules = configStore.loadRules()
+        for rule in rules {
+            guard rule.enabled else { continue }
+            if case .display(let ruleDisplayID) = rule.trigger, ruleDisplayID == displayID {
+                executeRule(rule)
             }
         }
     }
@@ -227,6 +251,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             actions: [], enabled: true, source: "user", scriptPath: winMaxFile
         ))
 
+        // Window to next screen: Cmd+Opt+Cmd+Right
+        let winNextScreen = "Ampliky.window.moveToNextScreen()"
+        let winNextScreenFile = scriptStore.saveScript(content: winNextScreen, name: "窗口移到下一个屏幕")
+        configStore.addRule(Rule(
+            id: UUID().uuidString, name: "窗口移到下一个屏幕",
+            trigger: .hotkey(key: "cmd+opt+ctrl+right"),
+            actions: [], enabled: true, source: "user", scriptPath: winNextScreenFile
+        ))
+
         // System: Cmd+Opt+M for mute toggle
         let muteScript = "Ampliky.system.toggleMute()"
         let muteFile = scriptStore.saveScript(content: muteScript, name: "静音切换")
@@ -275,6 +308,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case "context":
             return SocketProtocol.successResponse(id: request.id, result: [
                 "screens": NSScreen.screens.count,
+                "displays": NSScreen.screens.compactMap { screen in
+                    if let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber {
+                        return String(number.intValue)
+                    }
+                    return nil
+                }
             ])
         case "exec":
             // Execute action by name (convenience method for CLI)

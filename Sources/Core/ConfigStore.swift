@@ -54,11 +54,12 @@ struct RuleAction: Codable, Equatable {
 enum RuleTrigger: Codable, Equatable {
     case hotkey(key: String)
     case gesture(fingers: Int, action: String)
+    case display(id: String)          // Specific display connected
+    case displayCount(count: Int)     // Number of displays changed
     case wifi(ssid: String)
-    case display(count: Int)
     case time(from: String, to: String)
 
-    private enum CodingKeys: String, CodingKey { case type, key, fingers, action, ssid, count, from, to }
+    private enum CodingKeys: String, CodingKey { case type, key, fingers, action, id, count, ssid, from, to }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -69,8 +70,13 @@ enum RuleTrigger: Codable, Equatable {
             let fingers = try c.decode(Int.self, forKey: .fingers)
             let action = try c.decode(String.self, forKey: .action)
             self = .gesture(fingers: fingers, action: action)
+        case "display":
+            if let id = try? c.decode(String.self, forKey: .id) {
+                self = .display(id: id)
+            } else {
+                self = .displayCount(count: try c.decode(Int.self, forKey: .count))
+            }
         case "wifi": self = .wifi(ssid: try c.decode(String.self, forKey: .ssid))
-        case "display": self = .display(count: try c.decode(Int.self, forKey: .count))
         case "time": self = .time(from: try c.decode(String.self, forKey: .from), to: try c.decode(String.self, forKey: .to))
         default: throw DecodingError.dataCorruptedError(forKey: .type, in: c, debugDescription: "unknown trigger type: \(type)")
         }
@@ -86,12 +92,15 @@ enum RuleTrigger: Codable, Equatable {
             try c.encode("gesture", forKey: .type)
             try c.encode(fingers, forKey: .fingers)
             try c.encode(action, forKey: .action)
+        case .display(let id):
+            try c.encode("display", forKey: .type)
+            try c.encode(id, forKey: .id)
+        case .displayCount(let count):
+            try c.encode("displayCount", forKey: .type)
+            try c.encode(count, forKey: .count)
         case .wifi(let ssid):
             try c.encode("wifi", forKey: .type)
             try c.encode(ssid, forKey: .ssid)
-        case .display(let count):
-            try c.encode("display", forKey: .type)
-            try c.encode(count, forKey: .count)
         case .time(let from, let to):
             try c.encode("time", forKey: .type)
             try c.encode(from, forKey: .from)

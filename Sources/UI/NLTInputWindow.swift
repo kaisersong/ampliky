@@ -222,8 +222,13 @@ class NLTInputWindow: NSWindow {
             guard let ssid = triggerObj["ssid"] as? String else { return nil }
             trigger = .wifi(ssid: ssid)
         case "display":
-            guard let count = triggerObj["count"] as? Int else { return nil }
-            trigger = .display(count: count)
+            if let id = triggerObj["id"] as? String {
+                trigger = .display(id: id)
+            } else if let count = triggerObj["count"] as? Int {
+                trigger = .displayCount(count: count)
+            } else {
+                return nil
+            }
         case "time":
             guard let from = triggerObj["from"] as? String,
                   let to = triggerObj["to"] as? String else { return nil }
@@ -251,6 +256,8 @@ class NLTInputWindow: NSWindow {
         switch trigger {
         case .hotkey(let key): return key
         case .gesture(let fingers, let action): return "\(fingers) finger \(action)"
+        case .display(let id): return "display \(id)"
+        case .displayCount(let count): return "\(count) screens"
         case .wifi(let ssid): return ssid
         case .display(let count): return "\(count) screens"
         case .time(let from, let to): return "\(from)-\(to)"

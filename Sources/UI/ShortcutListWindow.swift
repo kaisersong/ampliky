@@ -206,6 +206,8 @@ extension ShortcutListWindow: NSTableViewDataSource, NSTableViewDelegate {
         switch trigger {
         case .hotkey(let key): return key
         case .gesture(let fingers, let action): return "\(fingers) finger \(action)"
+        case .display(let id): return "display \(id)"
+        case .displayCount(let count): return "\(count) screens"
         case .wifi(let ssid): return ssid
         case .display(let count): return "\(count) screens"
         case .time(let from, let to): return "\(from) - \(to)"

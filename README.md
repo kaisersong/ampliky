@@ -30,8 +30,16 @@ Ampliky replaces the need to learn scripting syntax with natural language input.
 - `Ampliky.cursor.warpNext()` — Jump cursor to next screen
 - `Ampliky.cursor.warpPrev()` — Jump cursor to previous screen
 - `Ampliky.cursor.moveTo(x, y)` — Move cursor to coordinates
+- `Ampliky.window.leftHalf()` — Snap focused window to left half
+- `Ampliky.window.rightHalf()` — Snap focused window to right half
+- `Ampliky.window.maximize()` — Maximize focused window
+- `Ampliky.window.moveToNextScreen()` — Move focused window to next screen (centered)
+- `Ampliky.window.moveToPrevScreen()` — Move focused window to previous screen (centered)
+- `Ampliky.window.moveToScreen(index)` — Move focused window to specific screen (centered)
 - `Ampliky.app.launch(name)` — Launch an application
 - `Ampliky.system.clipboard()` — Read/write clipboard
+- `Ampliky.system.toggleMute()` — Toggle system mute
+- `Ampliky.system.lockScreen()` — Lock screen
 
 ### CLI Interface
 

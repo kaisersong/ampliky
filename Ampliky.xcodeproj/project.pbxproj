@@ -23,6 +23,7 @@
 		56ECA947F8BAE189817C26BE /* RuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64EAB72655994EB65EFB757 /* RuleEngineTests.swift */; };
 		71B5BB25EB38E25067E858D0 /* ComprehensiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E30A35F193A2B17F9E8B7A22 /* ComprehensiveTests.swift */; };
 		771F3A08CE11809E37F91451 /* DebugOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20BBBCD597646C1687129D57 /* DebugOverlay.swift */; };
+		7FF694B21C72DF75035C509E /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 71407832DB71E7C9329D2FBB /* AppIcon.png */; };
 		82B09168EBD8B593E3FAFDD9 /* JSCRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94C55CBBEE98257337FC074D /* JSCRunner.swift */; };
 		835A3D533A307AE84D5CA7C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */; };
 		8B9DC0B1D73C6835E06D757B /* SelfHealerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296D7A08B1509D83614BB92A /* SelfHealerTests.swift */; };
@@ -37,11 +38,13 @@
 		BB3B82FB0472CAC0F0BBD78A /* EditShortcutWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7AB08FED32809A21F94EE9D /* EditShortcutWindow.swift */; };
 		C47529564DA610B17AC8AEDE /* ScriptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA3E5FF81FC344130585207 /* ScriptStore.swift */; };
 		C777810049CB03118C99CE2C /* AppAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D0D530725314CF2D27DAF15 /* AppAction.swift */; };
+		CCCCDE7105528656A0F88719 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A619AA14669C4D99E88DBEF /* WindowManager.swift */; };
 		D78A0A3FDBCAC2F1C2AFF5CB /* ConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */; };
 		DF4C18E1D88B4DAA01E68CA9 /* RuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D135BFFC46F2BC71F296360 /* RuleEngine.swift */; };
 		DF5E2D4A06165FB10F44E20D /* ShortcutListWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76462A8BAE4A7C2981F4CE78 /* ShortcutListWindow.swift */; };
 		E4C38EF141206FD2B7CE5682 /* GestureTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5500538519BD1F0E4EB3C4 /* GestureTrigger.swift */; };
 		E886D6BA9D9299FD16F7BEC5 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CE1B5D589E31A41CBAC2AA /* ConfigStore.swift */; };
+		E97B03F579C68CCB66F173E6 /* DisplayWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1294E342F9B088A35C6D9D /* DisplayWatcher.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,18 +60,21 @@
 /* Begin PBXFileReference section */
 		07E7AAD33BFC87C1634F1356 /* HotkeyTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyTrigger.swift; sourceTree = "<group>"; };
 		0899E2ADF099C8A03645DE05 /* ConfigStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStoreTests.swift; sourceTree = "<group>"; };
+		0A619AA14669C4D99E88DBEF /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		0D0D530725314CF2D27DAF15 /* AppAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAction.swift; sourceTree = "<group>"; };
 		112AA3D58729C7FA23ED8B42 /* Ampliky.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ampliky.entitlements; sourceTree = "<group>"; };
 		120604B2A469BBFBDDA90033 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		20BBBCD597646C1687129D57 /* DebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugOverlay.swift; sourceTree = "<group>"; };
 		22013EDAC4243EF2FA0D3A9D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		296D7A08B1509D83614BB92A /* SelfHealerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfHealerTests.swift; sourceTree = "<group>"; };
+		3C1294E342F9B088A35C6D9D /* DisplayWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayWatcher.swift; sourceTree = "<group>"; };
 		40CE1B5D589E31A41CBAC2AA /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
 		47258409620CFB2883F57AA2 /* SelfHealer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfHealer.swift; sourceTree = "<group>"; };
 		4AD2E0440CF461242C4FF7D2 /* LLMClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
 		4E37C2085818E7F116FE9675 /* CursorAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorAction.swift; sourceTree = "<group>"; };
 		5F099D6097967E18E668CD58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		60245B2B701DFB097ADB3820 /* CursorActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorActionTests.swift; sourceTree = "<group>"; };
+		71407832DB71E7C9329D2FBB /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon.png; sourceTree = "<group>"; };
 		76462A8BAE4A7C2981F4CE78 /* ShortcutListWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutListWindow.swift; sourceTree = "<group>"; };
 		7F5500538519BD1F0E4EB3C4 /* GestureTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureTrigger.swift; sourceTree = "<group>"; };
 		8661523565D6134E53758B4D /* AmplikyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AmplikyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				A86C9ACC8A0248FF39DEAB4B /* ContextMonitor.swift */,
+				3C1294E342F9B088A35C6D9D /* DisplayWatcher.swift */,
 				7F5500538519BD1F0E4EB3C4 /* GestureTrigger.swift */,
 				07E7AAD33BFC87C1634F1356 /* HotkeyTrigger.swift */,
 			);
@@ -128,6 +135,7 @@
 			children = (
 				0D0D530725314CF2D27DAF15 /* AppAction.swift */,
 				4E37C2085818E7F116FE9675 /* CursorAction.swift */,
+				0A619AA14669C4D99E88DBEF /* WindowManager.swift */,
 			);
 			path = Actions;
 			sourceTree = "<group>";
@@ -144,6 +152,7 @@
 		60E71EDDB719B9338506C6CB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				71407832DB71E7C9329D2FBB /* AppIcon.png */,
 				BF9295B1A9A778C41EB76DF5 /* Assets.xcassets */,
 			);
 			path = Resources;
@@ -330,6 +339,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7FF694B21C72DF75035C509E /* AppIcon.png in Resources */,
 				835A3D533A307AE84D5CA7C0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -370,6 +380,7 @@
 				8CE345209D994F543719C7D9 /* ContextMonitor.swift in Sources */,
 				9756C1F1B3AD15F239C64522 /* CursorAction.swift in Sources */,
 				771F3A08CE11809E37F91451 /* DebugOverlay.swift in Sources */,
+				E97B03F579C68CCB66F173E6 /* DisplayWatcher.swift in Sources */,
 				BB3B82FB0472CAC0F0BBD78A /* EditShortcutWindow.swift in Sources */,
 				E4C38EF141206FD2B7CE5682 /* GestureTrigger.swift in Sources */,
 				16F63EB52B0317605452D45E /* HotkeyTrigger.swift in Sources */,
@@ -387,6 +398,7 @@
 				DF5E2D4A06165FB10F44E20D /* ShortcutListWindow.swift in Sources */,
 				366EF29D1379174625DE814A /* SocketServer.swift in Sources */,
 				A82CD09C044B7BF8FA2679E4 /* SystemPrompt.swift in Sources */,
+				CCCCDE7105528656A0F88719 /* WindowManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +434,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Sources/App/Ampliky.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Sources/App/Info.plist;
@@ -603,6 +616,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Sources/App/Ampliky.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Sources/App/Info.plist;

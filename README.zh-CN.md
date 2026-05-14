@@ -30,8 +30,16 @@ Ampliky 让你无需学习脚本语法，只需告诉它你想做什么，它就
 - `Ampliky.cursor.warpNext()` — 光标跳到下一个屏幕
 - `Ampliky.cursor.warpPrev()` — 光标跳到上一个屏幕
 - `Ampliky.cursor.moveTo(x, y)` — 光标移动到坐标
+- `Ampliky.window.leftHalf()` — 窗口左半屏
+- `Ampliky.window.rightHalf()` — 窗口右半屏
+- `Ampliky.window.maximize()` — 窗口最大化
+- `Ampliky.window.moveToNextScreen()` — 窗口移到下一个屏幕（居中）
+- `Ampliky.window.moveToPrevScreen()` — 窗口移到上一个屏幕（居中）
+- `Ampliky.window.moveToScreen(index)` — 窗口移到指定屏幕（居中）
 - `Ampliky.app.launch(name)` — 启动应用
 - `Ampliky.system.clipboard()` — 读写剪贴板
+- `Ampliky.system.toggleMute()` — 静音切换
+- `Ampliky.system.lockScreen()` — 锁屏
 
 ### 命令行接口
 

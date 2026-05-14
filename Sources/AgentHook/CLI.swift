@@ -111,7 +111,7 @@ struct AmplikyCLI {
           ampliky exec '<action_json>'   Execute action by name
           ampliky rule list              List all rules
           ampliky rule remove <id>       Remove a rule
-          ampliky context                Show current context (screens)
+          ampliky context                Show current context (screens, displays)
 
         Examples:
           ampliky run 'Ampliky.cursor.warpNext()'

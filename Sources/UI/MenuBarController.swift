@@ -16,8 +16,16 @@ class MenuBarController: NSObject {
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Ampliky")
-            button.image?.isTemplate = true
+            // Use custom icon from asset catalog, scaled for menubar
+            if let icon = NSImage(named: "AppIcon") {
+                icon.size = NSSize(width: 18, height: 18)
+                icon.isTemplate = true
+                button.image = icon
+            } else {
+                // Fallback to SF Symbol
+                button.image = NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Ampliky")
+                button.image?.isTemplate = true
+            }
         }
         buildMenu()
         #if DEBUG

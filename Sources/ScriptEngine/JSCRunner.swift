@@ -144,7 +144,10 @@ class JSCRunner {
                 leftHalf: function() { __ampliky_window_leftHalf(); },
                 rightHalf: function() { __ampliky_window_rightHalf(); },
                 maximize: function() { __ampliky_window_maximize(); },
-                center: function() { __ampliky_window_center(); }
+                center: function() { __ampliky_window_center(); },
+                moveToNextScreen: function() { __ampliky_window_moveToNextScreen(); },
+                moveToPrevScreen: function() { __ampliky_window_moveToPrevScreen(); },
+                moveToScreen: function(i) { __ampliky_window_moveToScreen(i); }
             }
         };
         """)
@@ -292,38 +295,25 @@ class JSCRunner {
     // MARK: - Window APIs
 
     private func registerWindowAPIs() {
+        // Left half - works on any app's focused window
         context.setObject(unsafeBitCast({ () in
-            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
-                if let screen = win.screen {
-                    var frame = screen.frame
-                    frame.size.width /= 2
-                    win.setFrame(frame, display: true, animate: true)
-                }
-            }
+            _ = WindowManager.leftHalf()
         } as @convention(block) () -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_window_leftHalf" as NSString)
 
+        // Right half
         context.setObject(unsafeBitCast({ () in
-            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
-                if let screen = win.screen {
-                    var frame = screen.frame
-                    frame.origin.x += frame.width / 2
-                    frame.size.width /= 2
-                    win.setFrame(frame, display: true, animate: true)
-                }
-            }
+            _ = WindowManager.rightHalf()
         } as @convention(block) () -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_window_rightHalf" as NSString)
 
+        // Maximize
         context.setObject(unsafeBitCast({ () in
-            if let win = NSApp.mainWindow ?? NSApp.keyWindow {
-                if let screen = win.screen {
-                    win.setFrame(screen.frame, display: true, animate: true)
-                }
-            }
+            _ = WindowManager.maximize()
         } as @convention(block) () -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_window_maximize" as NSString)
 
+        // Center on current screen
         context.setObject(unsafeBitCast({ () in
             if let win = NSApp.mainWindow ?? NSApp.keyWindow {
                 if let screen = win.screen {
@@ -336,5 +326,23 @@ class JSCRunner {
             }
         } as @convention(block) () -> Void, to: AnyObject.self),
         forKeyedSubscript: "__ampliky_window_center" as NSString)
+
+        // Move to next screen
+        context.setObject(unsafeBitCast({ () in
+            _ = WindowManager.moveToNextScreen()
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_moveToNextScreen" as NSString)
+
+        // Move to previous screen
+        context.setObject(unsafeBitCast({ () in
+            _ = WindowManager.moveToPrevScreen()
+        } as @convention(block) () -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_moveToPrevScreen" as NSString)
+
+        // Move to specific screen
+        context.setObject(unsafeBitCast({ (i: Int) in
+            _ = WindowManager.moveToScreen(i)
+        } as @convention(block) (Int) -> Void, to: AnyObject.self),
+        forKeyedSubscript: "__ampliky_window_moveToScreen" as NSString)
     }
 }
