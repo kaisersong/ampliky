@@ -65,6 +65,12 @@ targets:
           fi
         basedOnDependencyAnalysis: false
         runOnlyWhenInstalling: false
+      - name: Copy MenubarIcon to bundle
+        script: |
+          echo "[Ampliky] Copying MenubarIcon.png to app bundle"
+          cp "${SRCROOT}/Resources/MenubarIcon.png" "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/"
+        basedOnDependencyAnalysis: false
+        runOnlyWhenInstalling: false
 
   AmplikyTests:
     type: bundle.unit-test
