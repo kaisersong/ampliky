@@ -1,0 +1,46 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build
+        run: |
+          xcodebuild -project Ampliky.xcodeproj \
+            -scheme Ampliky \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_STYLE=Automatic \
+            ENABLE_HARDENED_RUNTIME=NO \
+            clean build
+
+      - name: Package DMG
+        run: |
+          APP_PATH="build/Build/Products/Release/Ampliky.app"
+          # Remove extended attributes that break codesign
+          xattr -cr "$APP_PATH"
+
+          # Create DMG
+          hdiutil create -volname "Ampliky" \
+            -srcfolder "$APP_PATH" \
+            -ov -format UDZO \
+            Ampliky.dmg
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Ampliky.dmg
