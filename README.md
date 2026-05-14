@@ -21,6 +21,19 @@ Ampliky replaces the need to learn scripting syntax with natural language input.
 - LLM compiles natural language into executable JavaScript
 - Scripts cached locally — zero LLM calls at runtime
 
+### Default Shortcuts (v0.3.0)
+Ampliky ships with these built-in shortcuts:
+
+| Shortcut | Trigger |
+|----------|---------|
+| Cursor → next screen | `Ctrl+Opt+→` |
+| Cursor → next screen (gesture) | Three-finger tap |
+| Window → left half | `Cmd+Opt+←` |
+| Window → right half | `Cmd+Opt+→` |
+| Window → next screen | `Cmd+Opt+Ctrl+→` |
+
+Removed from defaults (still available via API): cursor previous screen, maximize, mute, lock screen.
+
 ### Trigger Types
 - **Keyboard shortcuts** — Global hotkeys like `Cmd+Opt+Up`
 - **Trackpad gestures** — Three-finger tap, swipes

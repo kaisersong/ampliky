@@ -33,7 +33,7 @@ targets:
         CFBundleDisplayName: Ampliky
         CFBundleIdentifier: com.kaisersong.ampliky
         CFBundleVersion: "20260514"
-        CFBundleShortVersionString: "0.2.0"
+        CFBundleShortVersionString: "0.3.0"
         LSUIElement: true
         LSMinimumSystemVersion: "14.0"
         NSAppleEventsUsageDescription: Ampliky needs this permission for window management.

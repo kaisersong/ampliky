@@ -44,10 +44,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let rules = configStore.loadRules()
 
-        // Seed default teleport shortcuts on first launch
-        if rules.isEmpty {
-            seedDefaultShortcuts()
-        }
+        // No default shortcuts - users create their own via UI
+        // if rules.isEmpty {
+        //     seedDefaultShortcuts()
+        // }
 
         ruleEngine = RuleEngine(rules: configStore.loadRules())
 
@@ -197,89 +197,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func seedDefaultShortcuts() {
-        let scriptStore = ScriptStore()
-
-        // Cursor teleport: Ctrl+Opt+Right/Left
-        let cursorNext = "Ampliky.cursor.warpNext()"
-        let cursorNextFile = scriptStore.saveScript(content: cursorNext, name: "光标跳到下一个屏幕")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "光标跳到下一个屏幕",
-            trigger: .hotkey(key: "ctrl+opt+right"),
-            actions: [], enabled: true, source: "user", scriptPath: cursorNextFile
-        ))
-
-        let cursorPrev = "Ampliky.cursor.warpPrev()"
-        let cursorPrevFile = scriptStore.saveScript(content: cursorPrev, name: "光标跳到上一个屏幕")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "光标跳到上一个屏幕",
-            trigger: .hotkey(key: "ctrl+opt+left"),
-            actions: [], enabled: true, source: "user", scriptPath: cursorPrevFile
-        ))
-
-        // Gesture: three-finger tap to jump to next screen
-        let gestureScript = "Ampliky.cursor.warpNext()"
-        let gestureFile = scriptStore.saveScript(content: gestureScript, name: "光标跳到下一个屏幕")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "光标跳屏（三指点击）",
-            trigger: .gesture(fingers: 3, action: "tap"),
-            actions: [], enabled: true, source: "user", scriptPath: gestureFile
-        ))
-
-        // Window management: Cmd+Opt+Left/Right/Up
-        let winLeft = "Ampliky.window.leftHalf()"
-        let winLeftFile = scriptStore.saveScript(content: winLeft, name: "窗口左半屏")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "窗口左半屏",
-            trigger: .hotkey(key: "cmd+opt+left"),
-            actions: [], enabled: true, source: "user", scriptPath: winLeftFile
-        ))
-
-        let winRight = "Ampliky.window.rightHalf()"
-        let winRightFile = scriptStore.saveScript(content: winRight, name: "窗口右半屏")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "窗口右半屏",
-            trigger: .hotkey(key: "cmd+opt+right"),
-            actions: [], enabled: true, source: "user", scriptPath: winRightFile
-        ))
-
-        let winMax = "Ampliky.window.maximize()"
-        let winMaxFile = scriptStore.saveScript(content: winMax, name: "窗口最大化")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "窗口最大化",
-            trigger: .hotkey(key: "cmd+opt+up"),
-            actions: [], enabled: true, source: "user", scriptPath: winMaxFile
-        ))
-
-        // Window to next screen: Cmd+Opt+Cmd+Right
-        let winNextScreen = "Ampliky.window.moveToNextScreen()"
-        let winNextScreenFile = scriptStore.saveScript(content: winNextScreen, name: "窗口移到下一个屏幕")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "窗口移到下一个屏幕",
-            trigger: .hotkey(key: "cmd+opt+ctrl+right"),
-            actions: [], enabled: true, source: "user", scriptPath: winNextScreenFile
-        ))
-
-        // System: Cmd+Opt+M for mute toggle
-        let muteScript = "Ampliky.system.toggleMute()"
-        let muteFile = scriptStore.saveScript(content: muteScript, name: "静音切换")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "静音切换",
-            trigger: .hotkey(key: "cmd+opt+m"),
-            actions: [], enabled: true, source: "user", scriptPath: muteFile
-        ))
-
-        // System: Cmd+Opt+L for lock screen
-        let lockScript = "Ampliky.system.lockScreen()"
-        let lockFile = scriptStore.saveScript(content: lockScript, name: "锁屏")
-        configStore.addRule(Rule(
-            id: UUID().uuidString, name: "锁屏",
-            trigger: .hotkey(key: "cmd+opt+l"),
-            actions: [], enabled: true, source: "user", scriptPath: lockFile
-        ))
-
-        Logger.shared.log(level: .info, message: "初始化默认快捷指令完成")
-    }
+    // Default shortcuts seeding removed - users create their own via UI
+    // All Ampliky functions (cursor teleport, window management, system actions)
+    // remain available through script execution
 
     private func handleRPC(_ request: RPCRequest) -> Data {
         switch request.method {
