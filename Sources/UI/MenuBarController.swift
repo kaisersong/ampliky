@@ -38,13 +38,11 @@ class MenuBarController: NSObject {
                 // Resize for menubar
                 icon.size = iconSize
 
-                // For menubar icons, we want to preserve the original colors
-                // and ensure transparency is handled correctly
-                // Don't use template mode - use the icon as-is
-                icon.isTemplate = false
+                // Use template mode to match standard macOS menubar style
+                // This makes the icon black/white to match system theme
+                icon.isTemplate = true
 
                 button.image = icon
-                print("[Ampliky] Set custom menubar icon (non-template)")
             } else {
                 // Fallback to SF Symbol
                 button.image = NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Ampliky")
