@@ -16,32 +16,29 @@ class MenuBarController: NSObject {
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            // Load custom icon for menubar
+            // Load custom menubar icon
             let iconSize = NSSize(width: 18, height: 18)
             var menubarIcon: NSImage?
 
-            // Try loading from asset catalog
-            if let icon = NSImage(named: NSImage.Name("AppIcon")) {
+            // Try loading MenubarIcon from asset catalog (template mode already set in Contents.json)
+            if let icon = NSImage(named: NSImage.Name("MenubarIcon")) {
                 menubarIcon = icon
+                print("[Ampliky] Loaded MenubarIcon from asset catalog")
             }
 
             // Try loading from bundle resources
             if menubarIcon == nil {
                 let bundle = Bundle.main
-                if let iconPath = bundle.path(forResource: "AppIcon", ofType: "png"),
+                if let iconPath = bundle.path(forResource: "MenubarIcon", ofType: "png"),
                    let icon = NSImage(contentsOfFile: iconPath) {
                     menubarIcon = icon
+                    menubarIcon?.isTemplate = true
+                    print("[Ampliky] Loaded MenubarIcon from PNG resource")
                 }
             }
 
             if let icon = menubarIcon {
-                // Resize for menubar
                 icon.size = iconSize
-
-                // Use template mode to match standard macOS menubar style
-                // This makes the icon black/white to match system theme
-                icon.isTemplate = true
-
                 button.image = icon
             } else {
                 // Fallback to SF Symbol
