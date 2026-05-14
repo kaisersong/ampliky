@@ -56,21 +56,12 @@ targets:
         com.apple.security.app-sandbox: false
         com.apple.security.cs.allow-jit: false
         com.apple.security.cs.allow-unsigned-executable-memory: false
-    postCompileScripts:
-      - name: Reset permissions (Debug only)
-        script: |
-          if [ "$CONFIGURATION" = "Debug" ]; then
-            echo "[Ampliky] Debug build: resetting permissions"
-            tccutil reset All com.kaisersong.ampliky 2>/dev/null || true
-          fi
-        basedOnDependencyAnalysis: false
-        runOnlyWhenInstalling: false
-      - name: Copy MenubarIcon to bundle
-        script: |
-          echo "[Ampliky] Copying MenubarIcon.png to app bundle"
-          cp "${SRCROOT}/Resources/MenubarIcon.png" "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/"
-        basedOnDependencyAnalysis: false
-        runOnlyWhenInstalling: false
+    copyFiles:
+      - name: Copy MenubarIcon
+        destination: resources
+        subpath: ""
+        files:
+          - Resources/MenubarIcon.png
 
   AmplikyTests:
     type: bundle.unit-test

@@ -16,30 +16,37 @@ class MenuBarController: NSObject {
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            // Load MenubarIcon directly from bundle resources
-            let bundle = Bundle.main
-            if let iconPath = bundle.path(forResource: "MenubarIcon", ofType: "png"),
+            // Load Ampliky icon
+            let iconPath = "/Users/song/projects/ampliky/Resources/MenubarIcon.png"
+            
+            print("[Ampliky] Looking for icon at: \(iconPath)")
+            
+            if FileManager.default.fileExists(atPath: iconPath),
                let icon = NSImage(contentsOfFile: iconPath) {
-                print("[Ampliky] Found MenubarIcon at: \(iconPath)")
+                print("[Ampliky] Loaded icon from path")
                 
-                // Set the icon size for menubar
+                // CRITICAL: Configure for menubar display
                 icon.size = NSSize(width: 18, height: 18)
                 
-                // Try WITHOUT template mode first to see the actual icon
+                // Force the icon to not be a template
                 icon.isTemplate = false
                 
-                // Set the button's image
+                // Set the icon with explicit configuration
                 button.image = icon
+                button.imageScaling = .scaleAxesIndependently
                 
-                // Ensure proper scaling
-                button.imageScaling = .scaleProportionallyUpOrDown
+                // Additional attempt to ensure non-template rendering
+                if let rep = icon.representations.first {
+                    rep.size = NSSize(width: 18, height: 18)
+                }
                 
-                print("[Ampliky] Set menubar icon (non-template mode)")
+                print("[Ampliky] Set menubar icon, isTemplate=\(icon.isTemplate)")
             } else {
-                print("[Ampliky] MenubarIcon not found, using fallback")
+                print("[Ampliky] Icon not found at \(iconPath)")
                 // Fallback to SF Symbol
                 button.image = NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Ampliky")
                 button.image?.isTemplate = true
+                print("[Ampliky] Using fallback SF Symbol")
             }
         }
         buildMenu()
@@ -48,6 +55,12 @@ class MenuBarController: NSObject {
             DebugOverlayWindow.show()
         }
         #endif
+    }
+    
+    private func setupFallbackIcon(_ button: NSStatusBarButton) {
+        button.image = NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Ampliky")
+        button.image?.isTemplate = true
+        print("[Ampliky] Using fallback SF Symbol")
     }
 
     private func buildMenu() {
