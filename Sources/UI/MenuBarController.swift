@@ -6,7 +6,6 @@ class MenuBarController: NSObject {
     private var nltWindow: NLTInputWindow?
     private var shortcutListWindow: ShortcutListWindow?
     private var logWindow: LogWindow?
-    private var debugLogWindow: LogViewerWindow?
     #if DEBUG
     private var debugOverlayEnabled = true
     #else
@@ -92,9 +91,6 @@ class MenuBarController: NSObject {
         addItem(menu, "权限设置", #selector(openPermissionSettings))
         #endif
 
-        // Log viewer
-        addItem(menu, "日志查看器", #selector(openDebugLog))
-
         // About
         addItem(menu, "关于 Ampliky", #selector(showAbout))
         menu.addItem(NSMenuItem.separator())
@@ -141,12 +137,6 @@ class MenuBarController: NSObject {
     @objc private func openLog() {
         if logWindow == nil { logWindow = LogWindow(); logWindow?.delegate = self }
         logWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-
-    @objc private func openDebugLog() {
-        if debugLogWindow == nil { debugLogWindow = LogViewerWindow() }
-        debugLogWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
@@ -235,7 +225,6 @@ extension MenuBarController: NSWindowDelegate {
         if window === nltWindow { nltWindow = nil }
         if window === shortcutListWindow { shortcutListWindow = nil }
         if window === logWindow { logWindow = nil }
-        if window === debugLogWindow { debugLogWindow = nil }
     }
 }
 
