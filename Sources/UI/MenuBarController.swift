@@ -16,15 +16,40 @@ class MenuBarController: NSObject {
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            // Use custom icon from asset catalog, scaled for menubar
-            if let icon = NSImage(named: "AppIcon") {
-                icon.size = NSSize(width: 18, height: 18)
-                icon.isTemplate = true
+            // Load custom icon for menubar
+            let iconSize = NSSize(width: 18, height: 18)
+            var menubarIcon: NSImage?
+
+            // Try loading from asset catalog
+            if let icon = NSImage(named: NSImage.Name("AppIcon")) {
+                menubarIcon = icon
+            }
+
+            // Try loading from bundle resources
+            if menubarIcon == nil {
+                let bundle = Bundle.main
+                if let iconPath = bundle.path(forResource: "AppIcon", ofType: "png"),
+                   let icon = NSImage(contentsOfFile: iconPath) {
+                    menubarIcon = icon
+                }
+            }
+
+            if let icon = menubarIcon {
+                // Resize for menubar
+                icon.size = iconSize
+
+                // For menubar icons, we want to preserve the original colors
+                // and ensure transparency is handled correctly
+                // Don't use template mode - use the icon as-is
+                icon.isTemplate = false
+
                 button.image = icon
+                print("[Ampliky] Set custom menubar icon (non-template)")
             } else {
                 // Fallback to SF Symbol
                 button.image = NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Ampliky")
                 button.image?.isTemplate = true
+                print("[Ampliky] Using fallback SF Symbol")
             }
         }
         buildMenu()
