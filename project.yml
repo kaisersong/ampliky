@@ -32,13 +32,14 @@ targets:
         CFBundleName: Ampliky
         CFBundleDisplayName: Ampliky
         CFBundleIdentifier: com.kaisersong.ampliky
-        CFBundleVersion: "20260512"
-        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "20260514"
+        CFBundleShortVersionString: "0.2.0"
         LSUIElement: true
         LSMinimumSystemVersion: "14.0"
         NSAppleEventsUsageDescription: Ampliky needs this permission for window management.
         NSInputMonitoringUsageDescription: Ampliky uses global hotkeys for cursor teleport and needs input monitoring access.
         NSPrincipalClass: NSApplication
+        CFBundleIconFile: AppIcon
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.kaisersong.ampliky
@@ -47,10 +48,15 @@ targets:
         COMBINE_HIDPI_IMAGES: YES
         SWIFT_STRICT_CONCURRENCY: targeted
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-      configs:
-        Debug:
-          OTHER_SWIFT_FLAGS: "-D DEBUG"
-    preBuildScripts:
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Automatic
+    entitlements:
+      path: Sources/App/Ampliky.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.cs.allow-jit: false
+        com.apple.security.cs.allow-unsigned-executable-memory: false
+    postCompileScripts:
       - name: Reset permissions (Debug only)
         script: |
           if [ "$CONFIGURATION" = "Debug" ]; then
@@ -58,12 +64,7 @@ targets:
             tccutil reset All com.kaisersong.ampliky 2>/dev/null || true
           fi
         basedOnDependencyAnalysis: false
-    entitlements:
-      path: Sources/App/Ampliky.entitlements
-      properties:
-        com.apple.security.app-sandbox: false
-        com.apple.security.cs.allow-jit: false
-        com.apple.security.cs.allow-unsigned-executable-memory: false
+        runOnlyWhenInstalling: false
 
   AmplikyTests:
     type: bundle.unit-test
