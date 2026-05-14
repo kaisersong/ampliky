@@ -28,8 +28,8 @@ class HotkeyTrigger {
     enum Key: String {
         case a, b, c, d, e, f, g, h, i, j, k, l, m
         case n, o, p, q, r, s, t, u, v, w, x, y, z
-        case `0` = "0", `1` = "1", `2` = "2", `3` = "3", `4` = "4"
-        case `5` = "5", `6` = "6", `7` = "7", `8` = "8", `9` = "9"
+        case num0 = "0", num1 = "1", num2 = "2", num3 = "3", num4 = "4"
+        case num5 = "5", num6 = "6", num7 = "7", num8 = "8", num9 = "9"
         case left = "left", right = "right", up = "up", down = "down"
         case space = "space", tab = "tab", enter = "enter", escape = "esc"
         case f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12
