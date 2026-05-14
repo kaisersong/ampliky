@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-15
@@ -31,10 +34,8 @@ jobs:
       - name: Package DMG
         run: |
           APP_PATH="build/Build/Products/Release/Ampliky.app"
-          # Remove extended attributes that break codesign
           xattr -cr "$APP_PATH"
 
-          # Create DMG
           hdiutil create -volname "Ampliky" \
             -srcfolder "$APP_PATH" \
             -ov -format UDZO \
